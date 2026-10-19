@@ -300,16 +300,16 @@ html.menu-open{overflow:hidden}
 }
 /* ===== Curriculum roadmap (Release Archipelago) =====
    Pinned 3D world + Ride-to-Rio style chrome: chapter index (left), stop card (right), progress strip (bottom). */
-.rm{position:relative;background:#DFE7F3}
+.rm{position:relative;background:#CFE1F5}
 .rm-stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden}
-.rm-poster{position:absolute;inset:0;background:#DFE7F3 url(/3d/archipelago-poster.webp) center/cover no-repeat;transition:opacity 1.2s cubic-bezier(.19,1,.22,1)}
+.rm-poster{position:absolute;inset:0;background:#CFE1F5 url(/3d/archipelago-poster.webp) center/cover no-repeat;transition:opacity 1.2s cubic-bezier(.19,1,.22,1)}
 .rm-canvas{position:absolute;inset:0;opacity:0;transition:opacity 1.4s cubic-bezier(.19,1,.22,1)}
 .rm-stage.is-ready .rm-canvas{opacity:1}
 .rm-stage.is-ready .rm-poster{opacity:0}
 .rm-shade{position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(90deg,rgba(223,231,243,.94) 0,rgba(223,231,243,.6) 22%,rgba(223,231,243,0) 40%),
-             linear-gradient(180deg,rgba(223,231,243,.9) 0,rgba(223,231,243,0) 26%),
-             linear-gradient(0deg,rgba(223,231,243,.85) 0,rgba(223,231,243,0) 18%)}
+  background:linear-gradient(90deg,rgba(226,238,250,.94) 0,rgba(226,238,250,.6) 22%,rgba(226,238,250,0) 40%),
+             linear-gradient(180deg,rgba(226,238,250,.9) 0,rgba(226,238,250,0) 26%),
+             linear-gradient(0deg,rgba(226,238,250,.85) 0,rgba(226,238,250,0) 18%)}
 .rm-ui{position:absolute;inset:0;margin:0 auto;padding-top:104px;padding-bottom:22px;display:grid;
   grid-template-columns:300px 1fr minmax(320px,380px);grid-template-rows:auto 1fr auto;gap:18px 24px;pointer-events:none}
 .rm-ui>*{pointer-events:auto}
@@ -363,7 +363,7 @@ html.menu-open{overflow:hidden}
 @media (max-width:1100px){.rm-ui{grid-template-columns:240px 1fr minmax(300px,340px)}}
 /* phones / small tablets: world on top, card as a bottom sheet */
 @media (max-width:900px){
-  .rm-shade{background:linear-gradient(180deg,rgba(223,231,243,.92) 0,rgba(223,231,243,0) 24%),linear-gradient(0deg,rgba(223,231,243,.95) 0,rgba(223,231,243,0) 46%)}
+  .rm-shade{background:linear-gradient(180deg,rgba(226,238,250,.92) 0,rgba(226,238,250,0) 24%),linear-gradient(0deg,rgba(226,238,250,.95) 0,rgba(226,238,250,0) 46%)}
   .rm-ui{padding-top:88px;padding-bottom:14px;grid-template-columns:1fr;grid-template-rows:auto 1fr auto auto;gap:10px}
   .rm-head{grid-column:1}
   .rm-head h2{font-size:24px}

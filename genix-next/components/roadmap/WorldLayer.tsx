@@ -32,9 +32,9 @@ function Clouds({ route, quality }: { route: Route; quality: "high" | "low" }) {
   const SEA = clusters * 5;
   const SKIRT = route.P.length * 7;
   const geo = useMemo(() => new THREE.IcosahedronGeometry(1, 2), []);
-  // the sea sits ~30 units below the camera: tinted toward the deep sky so it recedes and white islands pop
-  const mat = useMemo(() => new THREE.MeshStandardMaterial({ color: "#DDE6F4", roughness: 1, emissive: "#AFC1DF", emissiveIntensity: 0.1 }), []);
-  const skirtMat = useMemo(() => new THREE.MeshStandardMaterial({ color: "#EEF3FA", roughness: 1, emissive: "#D5E0F1", emissiveIntensity: 0.12 }), []);
+  // white cumulus; distance tints it blue through the fog, so it recedes naturally
+  const mat = useMemo(() => new THREE.MeshStandardMaterial({ color: "#FFFFFF", roughness: 1, emissive: "#D9E6F6", emissiveIntensity: 0.12 }), []);
+  const skirtMat = useMemo(() => new THREE.MeshStandardMaterial({ color: "#FFFFFF", roughness: 1, emissive: "#E4EDF8", emissiveIntensity: 0.15 }), []);
 
   useEffect(() => {
     const r = rand(7);

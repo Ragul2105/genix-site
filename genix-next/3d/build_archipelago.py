@@ -51,7 +51,14 @@ def mat(name, hexc, rough=0.85, metal=0.0, alpha=1.0, emit=0.0):
 # Names are the contract with the browser: it swaps these for tuned three.js materials.
 mat("clay", "#F3F5F9", 0.9)
 mat("shade", "#D9E1EE", 0.95)
-mat("rock", "#B9C6DA", 1.0)
+mat("rock", "#8C8172", 1.0)        # warm stone
+mat("grass", "#86C266", 0.9)
+mat("soil", "#B4875C", 0.95)
+mat("soilDark", "#8F6A47", 0.95)
+mat("bark", "#86593A", 0.9)
+mat("leaf", "#5BA84C", 0.85)
+mat("leaf2", "#7CBF59", 0.85)
+mat("water", "#4A9FE0", 0.2)
 mat("blue", "#2563EB", 0.55)
 mat("sky", "#9CC1FF", 0.7)
 mat("yellow", "#FFC83D", 0.5)
@@ -182,8 +189,9 @@ TOP = 0.25  # island top surface
 
 # ---------------------------------------------------------------- island shell
 def shell(rad=2.3):
-    cyl((0, 0, 0), rad, 0.5, "clay", verts=56, bevel=0.14)
-    cyl((0, 0, -0.32), rad * 0.97, 0.16, "shade", verts=56, bevel=0.04)
+    cyl((0, 0, -0.02), rad, 0.46, "soil", verts=56, bevel=0.1)
+    cyl((0, 0, 0.2), rad * 1.005, 0.12, "grass", verts=56, bevel=0.05)   # grass cap, top at TOP
+    cyl((0, 0, -0.32), rad * 0.97, 0.16, "soilDark", verts=56, bevel=0.04)
     # faceted rock underside, jittered so no two islands match
     bpy.ops.mesh.primitive_cone_add(vertices=9, radius1=rad * 0.92, radius2=0.18, depth=1.9, location=(0, 0, -1.33),
                                     rotation=(math.pi, 0, random.random()))
@@ -223,8 +231,8 @@ def underside(n, rad=2.3):
     join(stones, f"p{n:02d}_anim_debris", pivot=(0, 0, 0))
 
 def tree(x, y, s=1.0):
-    cyl((x, y, TOP + 0.22 * s), 0.05 * s, 0.44 * s, "shade", verts=10, bevel=0)
-    sph((x, y, TOP + 0.62 * s), 0.3 * s, "mint", ico=2)
+    cyl((x, y, TOP + 0.22 * s), 0.05 * s, 0.44 * s, "bark", verts=10, bevel=0)
+    sph((x, y, TOP + 0.62 * s), 0.3 * s, random.choice(("leaf", "leaf2")), ico=2)
 
 # ---------------------------------------------------------------- 18 dioramas (front faces -y)
 def p01():  # Entering the Real World: first day at the QA team's office
@@ -566,7 +574,7 @@ def p18():  # QA Career and Professional Development: the summit
             v.co.y *= random.uniform(0.85, 1.1)
     bm.to_mesh(o.data)
     bm.free()
-    finish(o, "shade", 0, smooth=False)
+    finish(o, "rock", 0, smooth=False)
     cyl((0, 0.1, TOP + 2.35), 0.62, 0.75, "clay", verts=9, bevel=0, r2=0.1)
     for k in range(13):  # the climb: stepping stones spiralling up
         t = k / 12
@@ -644,7 +652,8 @@ def jitter(o, amt, below=None):
     bm.free()
 
 def islet_base(R):
-    parts = [cyl((0, 0, 0), R, 0.34, "clay", verts=40, bevel=0.07)]
+    parts = [cyl((0, 0, -0.02), R, 0.3, "soil", verts=40, bevel=0.06),
+             cyl((0, 0, 0.13), R * 1.005, 0.09, "grass", verts=40, bevel=0.035)]
     bpy.ops.mesh.primitive_cone_add(vertices=7, radius1=R * 0.9, radius2=0.08, depth=R * 1.5,
                                     location=(0, 0, -0.17 - R * 0.75), rotation=(math.pi, 0, random.random()))
     o = bpy.context.active_object
@@ -653,8 +662,8 @@ def islet_base(R):
     return parts
 
 def mini_tree(x, y, z, s):
-    return [cyl((x, y, z + 0.18 * s), 0.035 * s, 0.36 * s, "shade", verts=8, bevel=0),
-            sph((x, y, z + 0.48 * s), 0.22 * s, "mint", ico=2)]
+    return [cyl((x, y, z + 0.18 * s), 0.035 * s, 0.36 * s, "bark", verts=8, bevel=0),
+            sph((x, y, z + 0.48 * s), 0.22 * s, random.choice(("leaf", "leaf2")), ico=2)]
 
 ISLET_KINDS = ["trees", "hut", "turbine", "dish", "mast", "pond", "solar", "trees", "hut", "turbine"]
 
@@ -704,7 +713,7 @@ def islet(k, loc, R, kind):
             parts.append(tor((0, 0, T + z), 0.12 * f * 1.414, 0.008, "navy", major=4, minor=4))
         anim.append(sph((0, 0, T + h + 0.04), 0.05, "glowYellow", name=f"world_anim_blink_{k}"))
     elif kind == "pond":
-        parts += [cyl((0.1, 0, T + 0.005), R * 0.5, 0.02, "sky", bevel=0)] + mini_tree(-R * 0.55, 0.25, T, 0.9)
+        parts += [cyl((0.1, 0, T + 0.005), R * 0.5, 0.02, "water", bevel=0)] + mini_tree(-R * 0.55, 0.25, T, 0.9)
         parts.append(sph((R * 0.5, -0.3, T + 0.06), 0.1, "rock", ico=1))
     elif kind == "solar":
         for j in range(3):

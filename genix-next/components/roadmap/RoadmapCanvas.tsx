@@ -16,7 +16,7 @@ import WorldLayer from "./WorldLayer";
 
 const MODEL = "/3d/archipelago.glb";
 const DRACO = "/draco/";
-const BG = "#E3E9F2";
+const BG = "#CFE1F5";
 const UP = new THREE.Vector3(0, 1, 0);
 const TOP = 0.25; // island surface height above its anchor (Blender TOP)
 
@@ -105,7 +105,14 @@ function makeMaterials() {
   const mats: Record<string, THREE.Material> = {
     clay: std("#F2F5FA", 0.78),
     shade: std("#D3DCEA", 0.86),
-    rock: std("#AFBDD3", 0.95, { flatShading: true }),
+    rock: std("#8A8070", 0.95, { flatShading: true }), // warm stone
+    grass: std("#7BBF57", 0.88),
+    soil: std("#B4875C", 0.95),
+    soilDark: std("#8F6A47", 0.95),
+    bark: std("#86593A", 0.9),
+    leaf: std("#5BA84C", 0.85, { flatShading: true }),
+    leaf2: std("#7CBF59", 0.85, { flatShading: true }),
+    water: std("#4A9FE0", 0.15, { metalness: 0.1 }),
     blue: std("#2563EB", 0.42),
     sky: std("#9CC1FF", 0.55),
     yellow: std("#FFC83D", 0.42),
@@ -148,7 +155,7 @@ function World({ activeRef }: { activeRef: MutableRefObject<number> }) {
     });
 
     // horizon continents sit past the fog's far plane: draw them as pale silhouettes instead, beacons still lit
-    const farMat = new THREE.MeshLambertMaterial({ color: "#C2D0E7", emissive: "#B3C3DF", emissiveIntensity: 0.35, fog: false });
+    const farMat = new THREE.MeshLambertMaterial({ color: "#A9C3DD", emissive: "#9AB6D6", emissiveIntensity: 0.35, fog: false });
     const farBeacon = new THREE.MeshBasicMaterial({ color: new THREE.Color("#FFC83D").multiplyScalar(1.6), toneMapped: false, fog: false });
     scene.children.filter((c) => c.name.startsWith("world_far_")).forEach((far) => far.traverse((c) => {
       const m = c as THREE.Mesh;
@@ -537,11 +544,11 @@ function Rig({ route, travelRef, uRef, activeRef }: {
 
   return (
     <>
-      <hemisphereLight args={["#FFFFFF", "#9FB0CC", 1.1]} />
+      <hemisphereLight args={["#D8EAFF", "#A08A68", 1.05]} />
       <directionalLight
         ref={sun}
-        color="#FFF4E2"
-        intensity={3.1}
+        color="#FFEFD0"
+        intensity={3.4}
         castShadow
         shadow-mapSize={[2048, 2048]}
         shadow-bias={-0.0004}
@@ -577,9 +584,9 @@ function Sky() {
   const params = useMemo(() => ({
     vertexShader: skyVert, fragmentShader: skyFrag, side: THREE.BackSide, depthWrite: false,
     uniforms: {
-      uTop: { value: new THREE.Color("#C9DBF5") },
-      uHorizon: { value: new THREE.Color("#F3EFEA") },
-      uBottom: { value: new THREE.Color("#93ACD6") }, // the drop below the clouds
+      uTop: { value: new THREE.Color("#5D97E3") },     // daylight blue overhead
+      uHorizon: { value: new THREE.Color("#E2EEF8") },
+      uBottom: { value: new THREE.Color("#7FA9DE") }, // the drop below the clouds
     },
   }), []);
   useFrame(({ camera }) => mesh.current?.position.copy(camera.position));
@@ -705,7 +712,7 @@ export default function RoadmapCanvas({ travelRef, activeRef, layout, running, q
     >
       <color attach="background" args={[BG]} />
       <Sky />
-      <fog attach="fog" args={["#C6D3EA", 20, 80]} /> {/* blue aerial haze: the focused island (~19u) stays crisp */}
+      <fog attach="fog" args={["#B9D3EE", 26, 95]} /> {/* blue aerial haze: the focused island (~19u) stays crisp */}
       <Environment resolution={64} frames={1}>
         <Lightformer intensity={2.2} position={[0, 6, 4]} scale={[12, 4, 1]} />
         <Lightformer intensity={1.2} position={[-6, 2, -2]} rotation-y={Math.PI / 2} scale={[8, 3, 1]} color="#CFE0FF" />
