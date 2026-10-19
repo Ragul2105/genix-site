@@ -12,10 +12,11 @@ import { Bloom, EffectComposer, N8AO } from "@react-three/postprocessing";
 import { Suspense, useEffect, useMemo, useRef, type MutableRefObject } from "react";
 import * as THREE from "three";
 import anchorsJson from "@/public/3d/anchors.json";
+import WorldLayer from "./WorldLayer";
 
 const MODEL = "/3d/archipelago.glb";
 const DRACO = "/draco/";
-const BG = "#DFE7F3";
+const BG = "#E3E9F2";
 const UP = new THREE.Vector3(0, 1, 0);
 const TOP = 0.25; // island surface height above its anchor (Blender TOP)
 
@@ -24,6 +25,7 @@ const anchors = anchorsJson as Anchor[];
 export const PARTS = anchors.length;
 
 export type Layout = "wide" | "narrow";
+export { MODEL, DRACO, UP, TOP };
 
 /* ------------------------------------------------------------------ route geometry */
 function buildRoute(layout: Layout) {
@@ -82,6 +84,9 @@ function buildRoute(layout: Layout) {
       .addScaledVector(dir[i], 1.2));
   });
   return {
+    dir,
+    right,
+    side,
     path,
     islandU,
     cam: new THREE.CatmullRomCurve3(cams, false, "centripetal"),
@@ -89,7 +94,7 @@ function buildRoute(layout: Layout) {
     P,
   };
 }
-type Route = ReturnType<typeof buildRoute>;
+export type Route = ReturnType<typeof buildRoute>;
 
 /* ------------------------------------------------------------------ materials (matched by Blender material name) */
 function makeMaterials() {
@@ -105,7 +110,8 @@ function makeMaterials() {
     sky: std("#9CC1FF", 0.55),
     yellow: std("#FFC83D", 0.42),
     navy: std("#0B1F3A", 0.48),
-    paper: std("#FFFFFF", 0.9),
+    paper: std("#FFFFFF", 0.9, { side: THREE.DoubleSide }),
+    crystal: std("#9CC1FF", 0.18, { emissive: new THREE.Color("#3D7BFF"), emissiveIntensity: 1.6, flatShading: true }),
     mint: std("#C9EBDA", 0.85, { flatShading: true }),
     red: std("#FF6B6B", 0.45),
     green: std("#3DD47A", 0.45),
@@ -134,10 +140,22 @@ function World({ activeRef }: { activeRef: MutableRefObject<number> }) {
       if (!m.isMesh) return;
       const name = (m.material as THREE.Material).name.replace(/\.\d+$/, "");
       m.material = mats[name] ?? mats.clay;
-      const see = name !== "glass" && !name.startsWith("glow") && !m.name.startsWith("cloud");
+      let root: THREE.Object3D = m;
+      while (root.parent && root.parent !== scene) root = root.parent;
+      const see = name !== "glass" && !name.startsWith("glow") && !/^(cloud_|world_far|world_islet)/.test(root.name);
       m.castShadow = see;
       m.receiveShadow = !name.startsWith("glow");
     });
+
+    // horizon continents sit past the fog's far plane: draw them as pale silhouettes instead, beacons still lit
+    const farMat = new THREE.MeshLambertMaterial({ color: "#C2D0E7", emissive: "#B3C3DF", emissiveIntensity: 0.35, fog: false });
+    const farBeacon = new THREE.MeshBasicMaterial({ color: new THREE.Color("#FFC83D").multiplyScalar(1.6), toneMapped: false, fog: false });
+    scene.children.filter((c) => c.name.startsWith("world_far_")).forEach((far) => far.traverse((c) => {
+      const m = c as THREE.Mesh;
+      if (!m.isMesh) return;
+      m.material = (m.material as THREE.Material).name === "glowYellow" ? farBeacon : farMat;
+      m.castShadow = m.receiveShadow = false;
+    }));
 
     const get = (n: string) => scene.getObjectByName(n);
     const list: Anim[] = [];
@@ -559,15 +577,15 @@ function Sky() {
   const params = useMemo(() => ({
     vertexShader: skyVert, fragmentShader: skyFrag, side: THREE.BackSide, depthWrite: false,
     uniforms: {
-      uTop: { value: new THREE.Color("#F5F8FD") },
-      uHorizon: { value: new THREE.Color(BG) },
-      uBottom: { value: new THREE.Color("#B9C8E0") },
+      uTop: { value: new THREE.Color("#C9DBF5") },
+      uHorizon: { value: new THREE.Color("#F3EFEA") },
+      uBottom: { value: new THREE.Color("#93ACD6") }, // the drop below the clouds
     },
   }), []);
   useFrame(({ camera }) => mesh.current?.position.copy(camera.position));
   return (
     <mesh ref={mesh} renderOrder={-1}>
-      <sphereGeometry args={[160, 32, 16]} />
+      <sphereGeometry args={[190, 32, 16]} />
       <shaderMaterial args={[params]} />
     </mesh>
   );
@@ -682,12 +700,12 @@ export default function RoadmapCanvas({ travelRef, activeRef, layout, running, q
       shadows
       dpr={quality === "high" ? [1, 1.75] : [1, 1.25]}
       frameloop={running ? "always" : "never"}
-      camera={{ fov: layout === "wide" ? 34 : 46, near: 0.1, far: 220, position: [10, 14, 20] }}
+      camera={{ fov: layout === "wide" ? 34 : 46, near: 0.1, far: 260, position: [10, 14, 20] }}
       gl={{ antialias: true, powerPreference: "high-performance", toneMapping: THREE.NeutralToneMapping }}
     >
       <color attach="background" args={[BG]} />
       <Sky />
-      <fog attach="fog" args={[BG, 30, 92]} />
+      <fog attach="fog" args={["#C6D3EA", 20, 80]} /> {/* blue aerial haze: the focused island (~19u) stays crisp */}
       <Environment resolution={64} frames={1}>
         <Lightformer intensity={2.2} position={[0, 6, 4]} scale={[12, 4, 1]} />
         <Lightformer intensity={1.2} position={[-6, 2, -2]} rotation-y={Math.PI / 2} scale={[8, 3, 1]} color="#CFE0FF" />
@@ -696,6 +714,7 @@ export default function RoadmapCanvas({ travelRef, activeRef, layout, running, q
       <Rig route={route} travelRef={travelRef} uRef={uRef} activeRef={activeRef} />
       <Suspense fallback={null}>
         <World activeRef={activeRef} />
+        <WorldLayer route={route} quality={quality} />
         <Ready onReady={onReady} />
       </Suspense>
       <LightPath route={route} uRef={uRef} />

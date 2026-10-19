@@ -63,6 +63,7 @@ mat("green", "#4ADE80", 0.55)
 mat("glass", "#BFD6FF", 0.05, alpha=0.28)
 mat("glow", "#4D8BFF", 0.3, emit=4.0)
 mat("glowYellow", "#FFC83D", 0.3, emit=4.0)
+mat("crystal", "#6EA8FF", 0.2, emit=1.5)
 
 # ---------------------------------------------------------------- primitives
 def finish(o, m, bevel=0.0, seg=3, smooth=True, name=None):
@@ -197,6 +198,29 @@ def shell(rad=2.3):
     bm.to_mesh(o.data)
     bm.free()
     finish(o, "rock", 0, smooth=False)
+
+def underside(n, rad=2.3):
+    """Glowing crystals growing out of the rock, and loose stones bobbing beneath it."""
+    for k in range(random.randint(3, 5)):
+        a = random.uniform(0, 2 * math.pi)
+        z = random.uniform(-1.9, -0.9)
+        r = rad * 0.92 * ((z + 2.28) / 1.9) * 0.92
+        base = Vector((math.cos(a) * r, math.sin(a) * r, z))
+        d = Vector((math.cos(a) * 0.55, math.sin(a) * 0.55, -0.85)).normalized()
+        ln = random.uniform(0.45, 0.95)
+        bpy.ops.mesh.primitive_cone_add(vertices=6, radius1=random.uniform(0.1, 0.2), radius2=0, depth=ln,
+                                        location=base + d * ln * 0.5)
+        o = bpy.context.active_object
+        o.rotation_mode = "QUATERNION"
+        o.rotation_quaternion = d.to_track_quat("Z", "Y")
+        finish(o, "crystal", 0, smooth=False)
+    stones = []
+    for k in range(random.randint(3, 5)):
+        a = random.uniform(0, 2 * math.pi)
+        R = random.uniform(rad + 0.2, rad + 1.0)
+        stones.append(sph((math.cos(a) * R, math.sin(a) * R, random.uniform(-2.3, -0.7)),
+                          random.uniform(0.1, 0.28), "rock", ico=1))
+    join(stones, f"p{n:02d}_anim_debris", pivot=(0, 0, 0))
 
 def tree(x, y, s=1.0):
     cyl((x, y, TOP + 0.22 * s), 0.05 * s, 0.44 * s, "shade", verts=10, bevel=0)
@@ -566,9 +590,10 @@ BUILDERS = [p01, p02, p03, p04, p05, p06, p07, p08, p09, p10, p11, p12, p13, p14
 anchors = []
 for i, build in enumerate(BUILDERS):
     BUILD = []
-    shell()
-    build()
     n = i + 1
+    shell()
+    underside(n)
+    build()
     # merge static parts per material (animated parts and path empties stay separate)
     static = [o for o in BUILD if o.type == "MESH" and "_anim_" not in o.name and o.parent is None
               and not o.name.startswith(f"p{n:02d}_")]
@@ -604,6 +629,202 @@ for k in range(16):
                           cz + random.uniform(-0.15, 0.25)), random.uniform(0.35, 0.7), "paper", seg=24))
     BUILD = []
     join(parts, f"cloud_{k:02d}")
+
+
+# ================================================================ the world around the route
+# Everything here is set dressing: named world_* so the browser can animate or clone it.
+
+def jitter(o, amt, below=None):
+    bm = bmesh.new()
+    bm.from_mesh(o.data)
+    for v in bm.verts:
+        if below is None or v.co.z < below:
+            v.co += Vector((random.uniform(-amt, amt), random.uniform(-amt, amt), random.uniform(-amt, amt)))
+    bm.to_mesh(o.data)
+    bm.free()
+
+def islet_base(R):
+    parts = [cyl((0, 0, 0), R, 0.34, "clay", verts=40, bevel=0.07)]
+    bpy.ops.mesh.primitive_cone_add(vertices=7, radius1=R * 0.9, radius2=0.08, depth=R * 1.5,
+                                    location=(0, 0, -0.17 - R * 0.75), rotation=(math.pi, 0, random.random()))
+    o = bpy.context.active_object
+    jitter(o, R * 0.08, below=R * 0.6)
+    parts.append(finish(o, "rock", 0, smooth=False))
+    return parts
+
+def mini_tree(x, y, z, s):
+    return [cyl((x, y, z + 0.18 * s), 0.035 * s, 0.36 * s, "shade", verts=8, bevel=0),
+            sph((x, y, z + 0.48 * s), 0.22 * s, "mint", ico=2)]
+
+ISLET_KINDS = ["trees", "hut", "turbine", "dish", "mast", "pond", "solar", "trees", "hut", "turbine"]
+
+def islet(k, loc, R, kind):
+    BUILD.clear()
+    T = 0.17
+    parts = islet_base(R)
+    anim = []
+    if kind == "trees":
+        for j in range(random.randint(2, 4)):
+            a = random.uniform(0, 6.28); r = random.uniform(0, R * 0.55)
+            parts += mini_tree(math.cos(a) * r, math.sin(a) * r, T, random.uniform(0.7, 1.2))
+    elif kind == "hut":  # a tiny server hut, lights on
+        parts += [box((0, 0, T + 0.24), (0.6, 0.5, 0.48), "clay", 0.05),
+                  box((0, 0, T + 0.5), (0.68, 0.58, 0.06), "navy", 0.02),
+                  box((0, -0.255, T + 0.28), (0.4, 0.02, 0.1), "glowYellow", 0),
+                  rod((0.2, 0.15, T + 0.53), (0.2, 0.15, T + 0.95), 0.012, "navy")]
+        parts += mini_tree(-R * 0.55, 0.2, T, 0.7)
+        anim.append(sph((0.2, 0.15, T + 0.97), 0.04, "glowYellow", name=f"world_anim_blink_{k}"))
+    elif kind == "turbine":
+        parts += [cyl((0, 0, T + 0.75), 0.07, 1.5, "clay", verts=16, bevel=0, r2=0.035),
+                  box((0, 0.06, T + 1.5), (0.12, 0.3, 0.12), "clay", 0.03)]
+        blades = [sph((0, 0, 0), 0.05, "navy")]
+        for j in range(3):
+            a = j * 2 * math.pi / 3
+            blades.append(box((math.cos(a) * 0.32, 0, math.sin(a) * 0.32), (0.62, 0.02, 0.06), "paper", 0.01,
+                              rot=(0, -a, 0)))
+        b = join(blades, f"world_anim_turbine_{k}", pivot=(0, 0, 0))
+        b.location = (0, -0.12, T + 1.5)
+        anim.append(b)
+    elif kind == "dish":
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=24, ring_count=12, radius=0.38, location=(0, 0, 0))
+        o = bpy.context.active_object
+        bm = bmesh.new(); bm.from_mesh(o.data)
+        bmesh.ops.delete(bm, geom=[v for v in bm.verts if v.co.z > 0.02], context="VERTS")
+        bm.to_mesh(o.data); bm.free()
+        o.scale = (1, 1, 0.45); bpy.ops.object.transform_apply(scale=True)
+        o.location = (0, 0, T + 0.62); o.rotation_euler = (math.pi + 0.6, 0, 0.4)
+        parts += [finish(o, "clay", 0), rod((0, 0, T), (0, 0, T + 0.55), 0.04, "navy"),
+                  rod((0, 0.05, T + 0.6), (0, -0.2, T + 0.95), 0.012, "navy"), sph((0, -0.2, T + 0.96), 0.035, "blue")]
+    elif kind == "mast":
+        h = 1.6
+        for dx, dy in ((-0.12, -0.12), (0.12, -0.12), (0.12, 0.12), (-0.12, 0.12)):
+            parts.append(rod((dx, dy, T), (dx * 0.25, dy * 0.25, T + h), 0.012, "navy"))
+        for z in (0.4, 0.8, 1.2):
+            f = 1 - z / h * 0.75
+            parts.append(tor((0, 0, T + z), 0.12 * f * 1.414, 0.008, "navy", major=4, minor=4))
+        anim.append(sph((0, 0, T + h + 0.04), 0.05, "glowYellow", name=f"world_anim_blink_{k}"))
+    elif kind == "pond":
+        parts += [cyl((0.1, 0, T + 0.005), R * 0.5, 0.02, "sky", bevel=0)] + mini_tree(-R * 0.55, 0.25, T, 0.9)
+        parts.append(sph((R * 0.5, -0.3, T + 0.06), 0.1, "rock", ico=1))
+    elif kind == "solar":
+        for j in range(3):
+            parts += [box((-0.35 + j * 0.35, 0, T + 0.22), (0.3, 0.42, 0.02), "navy", 0.0, rot=(0.6, 0, 0)),
+                      rod((-0.35 + j * 0.35, 0.05, T), (-0.35 + j * 0.35, 0.05, T + 0.18), 0.012, "shade")]
+    root = join(parts, f"world_islet_{k:02d}", pivot=(0, 0, 0))
+    for a in anim:
+        a.parent = root
+    root.location = loc
+    root.rotation_euler = (0, 0, random.uniform(0, 6.28))
+
+# satellite islets: a populated sky either side of the route (kept clear of the camera corridor)
+for k in range(30):
+    t = (k + random.uniform(0, 0.8)) / 30
+    cy = -7.4 * 17 * t + random.uniform(-2, 2) + 6
+    cx = 7.2 * math.sin(t * 17 * 0.82) + random.choice((-1, 1)) * random.uniform(10, 19)
+    cz = 0.22 * 17 * t + random.uniform(-5, 2.5)
+    islet(k, (cx, cy, cz), random.uniform(0.55, 1.05), ISLET_KINDS[k % len(ISLET_KINDS)])
+
+# distant continents on the horizon: giant masses with server-tower spires and beacons
+for k in range(8):
+    BUILD.clear()
+    R = random.uniform(8, 13)
+    parts = [cyl((0, 0, 0), R, 1.2, "shade", verts=48, bevel=0.3)]
+    bpy.ops.mesh.primitive_cone_add(vertices=10, radius1=R * 0.92, radius2=0.5, depth=R * 1.2,
+                                    location=(0, 0, -0.6 - R * 0.6), rotation=(math.pi, 0, random.random()))
+    o = bpy.context.active_object
+    jitter(o, R * 0.06, below=R * 0.5)
+    parts.append(finish(o, "rock", 0, smooth=False))
+    beacons = []
+    for j in range(random.randint(4, 7)):
+        a = random.uniform(0, 6.28); r = random.uniform(0, R * 0.55)
+        h = random.uniform(3, 11); w = random.uniform(1.0, 2.0)
+        x, y = math.cos(a) * r, math.sin(a) * r
+        parts.append(box((x, y, 0.6 + h / 2), (w, w, h), "clay", 0.12))
+        parts.append(box((x, y, 0.6 + h + 0.15), (w * 0.7, w * 0.7, 0.3), "navy", 0.05))
+        beacons.append(sph((x, y, 0.6 + h + 0.45), 0.18, "glowYellow"))
+    parts.append(sph((R * 0.4, -R * 0.3, 0.6), R * 0.22, "clay", scale=(1, 1, 0.55)))
+    root = join(parts + beacons, f"world_far_{k}", pivot=(0, 0, 0))
+    side = 1 if k % 2 else -1
+    root.location = (side * random.uniform(46, 66), -6 - k * 17 + random.uniform(-4, 4), random.uniform(-16, -6))
+
+# the release whale: a sky-whale airship carrying build containers (faces +x)
+BUILD.clear()
+w = [sph((0, 0, 0), 1, "clay", scale=(4.2, 1.5, 1.35), seg=40),
+     sph((0.2, 0, -0.42), 1, "shade", scale=(3.7, 1.25, 0.95), seg=32),
+     sph((2.95, 1.05, 0.25), 0.15, "navy"), sph((2.95, -1.05, 0.25), 0.15, "navy"),
+     sph((3.02, 1.12, 0.3), 0.05, "paper"), sph((3.02, -1.12, 0.3), 0.05, "paper"),
+     sph((1.1, 1.45, -0.55), 1, "clay", scale=(0.95, 0.4, 0.09)),
+     sph((1.1, -1.45, -0.55), 1, "clay", scale=(0.95, 0.4, 0.09)),
+     box((-0.2, 0, 1.28), (3.2, 1.7, 0.14), "navy", 0.05)]
+cols = ["yellow", "blue", "clay", "navy", "yellow", "sky"]
+for j in range(6):
+    w.append(box((-1.2 + (j % 3) * 1.0, -0.42 + (j // 3) * 0.84, 1.66), (0.9, 0.74, 0.62), cols[j], 0.06))
+for x in (-1.75, 1.35):
+    w.append(rod((x, -1.15, 0.9), (x, 1.15, 0.9), 0.02, "navy"))
+whale = join(w, "world_anim_whale", pivot=(0, 0, 0))
+tail = [cyl((-4.6, 0, 0.05), 0.55, 1.4, "clay", verts=24, bevel=0, r2=0.22, rot=(0, -math.pi / 2, 0)),
+        sph((-5.45, 0.65, 0.12), 1, "clay", scale=(0.7, 0.62, 0.08)),
+        sph((-5.45, -0.65, 0.12), 1, "clay", scale=(0.7, 0.62, 0.08))]
+t = join(tail, "world_anim_whale_tail", pivot=(-3.9, 0, 0))
+t.parent = whale
+for j, y in enumerate((-1.75, 1.75)):
+    pod = [cyl((0, 0, 0), 0.24, 0.7, "navy", verts=24, bevel=0.03, rot=(0, math.pi / 2, 0)),
+           rod((0, 0, 0.1), (0, -y * 0.25, 0.55), 0.04, "navy")]
+    pd = join(pod, f"world_whale_pod_{j}", pivot=(0, 0, 0))
+    pd.location = (0.4, y, 0.55)
+    pd.parent = whale
+    pr = cyl((0, 0, 0), 0.42, 0.015, "glass", verts=32, bevel=0, rot=(0, math.pi / 2, 0), name=f"world_anim_whale_prop_{j}")
+    pr.location = (0.78, y, 0.55)
+    pr.parent = whale
+
+# test-passed blimp (faces +x); the banner is drawn in the browser
+BUILD.clear()
+b = [sph((0, 0, 0), 1, "clay", scale=(2.4, 0.75, 0.75), seg=36),
+     cyl((0.3, 0, 0), 0.77, 0.32, "blue", verts=36, bevel=0, rot=(0, math.pi / 2, 0)),
+     box((0.2, 0, -0.85), (0.9, 0.34, 0.26), "navy", 0.06)]
+for a in (0, math.pi / 2, math.pi, 3 * math.pi / 2):
+    b.append(box((-2.05, 0.45 * math.cos(a), 0.45 * math.sin(a)), (0.55, 0.05, 0.4), "blue", 0.02, rot=(a, 0, 0)))
+join(b, "world_anim_blimp", pivot=(0, 0, 0))
+
+# hot-air balloons, striped by gore
+for k, (c1, c2) in enumerate((("yellow", "clay"), ("blue", "clay"), ("sky", "paper"))):
+    BUILD.clear()
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=24, ring_count=14, radius=1.0, location=(0, 0, 0))
+    o = bpy.context.active_object
+    o.scale = (1, 1, 1.18)
+    bpy.ops.object.transform_apply(scale=True)
+    finish(o, c1, 0)
+    o.data.materials.append(MATS[c2])
+    for f in o.data.polygons:
+        ang = math.atan2(f.center.y, f.center.x)
+        f.material_index = int((ang + math.pi) / (2 * math.pi) * 12) % 2
+    parts = [o, cyl((0, 0, -1.2), 0.42, 0.3, "navy", verts=24, bevel=0, r2=0.28),
+             box((0, 0, -1.85), (0.46, 0.46, 0.34), "navy", 0.05)]
+    for dx, dy in ((-0.2, -0.2), (0.2, -0.2), (0.2, 0.2), (-0.2, 0.2)):
+        parts.append(rod((dx, dy, -1.68), (dx * 1.6, dy * 1.6, -1.25), 0.012, "navy"))
+    join(parts, f"world_anim_balloon_{k}", pivot=(0, 0, 0))
+
+# paper plane (a team message), drone (a delivered order): templates the browser clones
+BUILD.clear()
+mesh = bpy.data.meshes.new("world_plane")
+verts = [(0.7, 0, 0), (-0.45, 0.55, 0.06), (-0.45, 0, 0.02), (-0.45, -0.55, 0.06), (-0.45, 0, -0.17)]
+faces = [(0, 1, 2), (0, 2, 3), (0, 2, 4)]
+mesh.from_pydata(verts, [], faces)
+o = bpy.data.objects.new("world_plane", mesh)
+bpy.context.collection.objects.link(o)
+finish(o, "paper", 0, smooth=False)
+
+BUILD.clear()
+d = [box((0, 0, 0), (0.42, 0.42, 0.14), "navy", 0.05),
+     box((0, 0, 0), (0.95, 0.06, 0.04), "navy", 0.01, rot=(0, 0, math.pi / 4)),
+     box((0, 0, 0), (0.95, 0.06, 0.04), "navy", 0.01, rot=(0, 0, -math.pi / 4)),
+     sph((0.21, 0, 0.02), 0.035, "glowYellow"),
+     box((0, 0, -0.34), (0.28, 0.28, 0.24), "paper", 0.03),
+     box((0, 0, -0.215), (0.29, 0.07, 0.01), "yellow", 0),
+     rod((0.1, 0, -0.07), (0.1, 0, -0.22), 0.01, "shade"), rod((-0.1, 0, -0.07), (-0.1, 0, -0.22), 0.01, "shade")]
+for a in (math.pi / 4, 3 * math.pi / 4, 5 * math.pi / 4, 7 * math.pi / 4):
+    d.append(cyl((0.34 * math.cos(a), 0.34 * math.sin(a), 0.05), 0.17, 0.01, "glass", verts=24, bevel=0))
+join(d, "world_drone", pivot=(0, 0, 0))
 
 bpy.ops.export_scene.gltf(filepath=os.path.join(OUT, "archipelago.raw.glb"), export_format="GLB", export_apply=True,
                           export_yup=True, export_cameras=False, export_lights=False, export_texcoords=False)
