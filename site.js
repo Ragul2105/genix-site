@@ -1,0 +1,2 @@
+/* DEMO ONLY: replace with real, secure form handling (server/CRM, spam protection) */
+document.querySelectorAll('form[data-demo]').forEach(function(f){f.addEventListener('submit',function(e){e.preventDefault();var m=f.querySelector('.ok');if(m)m.style.display='block';m.scrollIntoView({behavior:'smooth',block:'center'});});});
