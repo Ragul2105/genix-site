@@ -1,19 +1,25 @@
 import Image from "next/image";
 import Link from "next/link";
+import Icon from "@/components/Icon";
 import CountUp from "@/components/CountUp";
 import TypedHeading from "@/components/TypedHeading";
 import FeatureCards from "@/components/FeatureCards";
 import JourneyBlueprint from "@/components/JourneyBlueprint";
 import { learningCycle } from "@/lib/site";
-import { curriculum } from "@/lib/curriculum";
+import { ACTS, curriculum } from "@/lib/curriculum";
 
-const highlights = [
-  ["QA fundamentals", "SDLC, Agile, requirements, scenarios and test cases."],
-  ["Functional testing", "UI, exploratory testing, defects and regression."],
-  ["API and database", "REST, HTTP, integration and SQL validation."],
-  ["Automation", "Strategy, frameworks, reusable tests, maintenance."],
-  ["Git, CI/CD, production", "Source control, pipelines and failure investigation."],
-  ["AI and career", "AI-assisted QA, responsible use, CV and interviews."],
+const audiences: [string, string, string][] = [
+  ["graduate", "Graduates", "Turn what you studied into hands-on testing on a working project."],
+  ["sprout", "Freshers", "Start your first role already knowing how a QA team works day to day."],
+  ["switch", "Career changers", "Move into testing with a structured path from the basics to interviews."],
+  ["layers", "Learners strengthening QA process knowledge", "Connect the terms you know to the process real teams run."],
+];
+const leaveWith = [
+  "Scenario-based interview practice",
+  "API, SQL and automation interview topics",
+  "QA CV and professional profile guidance",
+  "ISTQB structure and preparation guidance",
+  "Junior QA to QA Lead and SDET career paths",
 ];
 
 export default function Home() {
@@ -136,45 +142,78 @@ export default function Home() {
         </div>
       </section>
 
+      {/* the 18 parts as the five stages of the roadmap */}
       <section className="sec">
         <div className="w">
-          <div style={{ maxWidth: 760 }}>
-            <div className="eb">Programme highlights</div>
-            <h2>One programme. A complete QA learning journey.</h2>
+          <div className="sec-head">
+            <div style={{ maxWidth: 720 }}>
+              <div className="eb">Programme highlights</div>
+              <h2>One programme. A complete QA learning journey.</h2>
+              <p className="lead">Eighteen parts in five stages, from your first day on a QA team to your first job search.</p>
+            </div>
+            <Link href="/programme#curriculum" className="sec-link">Walk the full roadmap <i aria-hidden="true">↗</i></Link>
           </div>
-          <div className="g">{highlights.map(([t, d]) => <div className="card" key={t}><h3>{t}</h3><p>{d}</p></div>)}</div>
-          <p style={{ marginTop: 40 }}><Link className="btn y" href="/programme#curriculum">View Full Curriculum</Link></p>
+          <ol className="hs-stages">
+            {ACTS.map((a, i) => (
+              <li key={a.name}>
+                <div className="hs-top">
+                  <span className="hs-n">Stage {i + 1}</span>
+                  <span className="hs-range">Parts {String(a.from).padStart(2, "0")}–{String(a.to).padStart(2, "0")}</span>
+                </div>
+                <h3>{a.name}</h3>
+                <ul>{curriculum.slice(a.from - 1, a.to).map((p) => <li key={p.title}>{p.title}</li>)}</ul>
+              </li>
+            ))}
+          </ol>
         </div>
       </section>
 
-      <section className="tint" style={{ padding: "88px 0" }}>
-        <div className="w row" style={{ alignItems: "center" }}>
-          <div>
+      {/* who it's for: heading left, audiences right (after Educore's "why choose us") */}
+      <section className="sec tint">
+        <div className="w hw">
+          <div className="hw-side">
             <div className="eb">Who can join?</div>
             <h2>Start your journey in software testing.</h2>
-            <p className="lead">Designed for graduates, freshers, career changers and learners who want to strengthen their QA process knowledge. Prerequisites are listed in the programme details.</p>
-            <p style={{ marginTop: 28 }}><Link className="btn b" href="/programme#logistics">Check Programme Details</Link></p>
+            <p className="lead">The programme is designed for people at the start of a QA career, and for anyone who wants to understand how a real QA team works.</p>
+            <div className="actions" style={{ marginBottom: 0 }}>
+              <Link className="btn y" href="/enrol">Enquire About Enrolment</Link>
+              <Link className="btn b" href="/programme#logistics">Programme Details</Link>
+            </div>
           </div>
-          <div className="card">
-            <div className="eb">Prepare for your next step</div>
-            <ul className="list-lines">
-              <li>Scenario-based interview practice</li>
-              <li>API, SQL and automation interview topics</li>
-              <li>QA CV and professional profile guidance</li>
-              <li>ISTQB structure and preparation guidance</li>
-              <li>Junior QA to QA Lead and SDET career paths</li>
+          <div>
+            <ul className="hw-list">
+              {audiences.map(([icon, t, d]) => (
+                <li key={t}><span className="hw-ic"><Icon name={icon} /></span><div><h3>{t}</h3><p>{d}</p></div></li>
+              ))}
             </ul>
+            <div className="hw-leave">
+              <span>You leave prepared with</span>
+              <ul>{leaveWith.map((l) => <li key={l}><Icon name="check" size={16} />{l}</li>)}</ul>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="cta" style={{ padding: "100px 0" }}>
+      {/* two doors: learners and businesses */}
+      <section className="cta cta-doors">
         <div className="w">
           <div className="kick">LEARN | BUILD | GROW</div>
           <h2 style={{ fontSize: 50 }}>Take the first step towards your QA career.</h2>
           <p>Explore a practical approach to learning software testing.</p>
-          <Link className="btn y" href="/enrol">Enquire About Enrolment</Link>
-          <p className="alt">Business? <Link href="/contact" style={{ color: "#fff", fontWeight: 700 }}>Request a testing consultation →</Link></p>
+          <div className="doors">
+            <Link href="/enrol" className="door is-learn">
+              <span className="door-ic"><Icon name="graduate" size={26} /></span>
+              <span className="door-k">I want to learn QA</span>
+              <strong>Enquire about enrolment</strong>
+              <span className="door-go">Get programme details <Icon name="arrow" size={18} /></span>
+            </Link>
+            <Link href="/contact#business" className="door">
+              <span className="door-ic"><Icon name="briefcase" size={26} /></span>
+              <span className="door-k">I need software tested</span>
+              <strong>Request a testing consultation</strong>
+              <span className="door-go">Talk to the testing team <Icon name="arrow" size={18} /></span>
+            </Link>
+          </div>
         </div>
       </section>
     </>

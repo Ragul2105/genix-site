@@ -30,6 +30,7 @@ export default function SmoothScroll() {
       if (!target) return;
       e.preventDefault();
       history.pushState(null, "", url.hash);
+      window.dispatchEvent(new HashChangeEvent("hashchange")); // pushState doesn't fire it; listeners (e.g. the enquiry form) rely on it
       instance.scrollTo(target as HTMLElement, { offset: -90 });
     };
     document.addEventListener("click", onClick);

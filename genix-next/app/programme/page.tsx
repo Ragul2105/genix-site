@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
+import Icon from "@/components/Icon";
+import stepAnchors from "@/public/illustrations/confidence-steps.json";
 import PageHero from "@/components/PageHero";
 import Roadmap from "@/components/roadmap/Roadmap";
 import AppStack from "@/components/AppStack";
@@ -9,6 +12,9 @@ import CtaBand from "@/components/CtaBand";
 import { journey, logistics } from "@/lib/site";
 
 export const metadata: Metadata = { title: "QA Programme" };
+
+const stepColours = ["#6EA8FF", "#2563EB", "#E0A800"]; // the risers' colours in the render
+const logisticIcons = ["clock", "calendar", "monitor", "wallet", "list", "route", "user", "tools"];
 
 const outcomes = [
   ["Knowledge confidence", "Understand testing concepts, terminology, tools and professional practices."],
@@ -74,23 +80,51 @@ export default function Programme() {
           </div>
         </div>
       </section>
+      {/* three levels of confidence, as a staircase (rendered in Blender: 3d/build_steps.py) */}
       <section className="sec tint">
         <div className="w">
           <div className="eb">Learning outcomes</div>
           <h2>Three levels of confidence.</h2>
-          <div className="g" style={{ marginTop: 40 }}>{outcomes.map(([t, d]) => <div className="card" key={t}><h3>{t}</h3><p>{d}</p></div>)}</div>
-          <p style={{ marginTop: 28 }}>The programme gives realistic project exposure to make the transition into a QA role smoother. It does not claim that completing a course makes you an experienced employee.</p>
+          <p className="lead">Each level builds on the one below it: first you understand the work, then you can talk about it, then you can do it on a team.</p>
+          <figure className="po-steps">
+            <Image src="/illustrations/confidence-steps.webp" width={1800} height={1000} sizes="(max-width: 900px) 94vw, 1100px"
+              alt="A staircase of three steps: books for knowledge, speech bubbles for interviews, and a laptop with a team ID badge for the job." />
+            {outcomes.map(([t], i) => {
+              const [x, y] = (stepAnchors as unknown as Record<string, [number, number]>)[String(i)];
+              return <span key={t} className="po-tag" style={{ left: `${x * 100}%`, top: `${y * 100}%`, ["--c" as string]: stepColours[i] }}><b>{i + 1}</b>{t}</span>;
+            })}
+          </figure>
+          <ol className="po-levels">
+            {outcomes.map(([t, d], i) => (
+              <li key={t} style={{ ["--c" as string]: stepColours[i] }}>
+                <span className="po-lv">Level {i + 1}</span>
+                <h3>{t}</h3>
+                <p>{d}</p>
+              </li>
+            ))}
+          </ol>
+          <p className="po-note">The programme gives realistic project exposure to make the transition into a QA role smoother. It does not claim that completing a course makes you an experienced employee.</p>
         </div>
       </section>
+
+      {/* programme details: an honest spec sheet */}
       <section className="sec" id="logistics">
-        <div className="w">
-          <div className="eb">Programme details</div>
-          <h2>Logistics</h2>
-          <table>
-            <tbody>
-              {logistics.map((l) => <tr key={l}><th scope="row">{l}</th><td className="tbc">To be confirmed</td></tr>)}
-            </tbody>
-          </table>
+        <div className="w po-spec">
+          <div>
+            <div className="eb">Programme details</div>
+            <h2>Logistics</h2>
+            <p className="lead">The next batch is being finalised. Ask us and we will send the details as soon as they are confirmed.</p>
+            <Link className="btn y" href="/enrol" style={{ marginTop: 28 }}>Ask About the Next Batch</Link>
+          </div>
+          <dl className="po-grid">
+            {logistics.map((l, i) => (
+              <div key={l}>
+                <span className="po-ic"><Icon name={logisticIcons[i]} size={20} /></span>
+                <dt>{l}</dt>
+                <dd>To be confirmed</dd>
+              </div>
+            ))}
+          </dl>
         </div>
       </section>
       <CtaBand title="Ready to find out more?" text="Send an enquiry and we will get back to you with programme details." href="/enrol" label="Enquire About Enrolment" />

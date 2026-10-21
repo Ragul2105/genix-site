@@ -7,7 +7,7 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { curriculum } from "@/lib/curriculum";
+import { ACTS, curriculum } from "@/lib/curriculum";
 import { activeLenis } from "@/components/SmoothScroll";
 import type { Layout } from "./RoadmapCanvas";
 
@@ -15,14 +15,6 @@ const RoadmapCanvas = dynamic(() => import("./RoadmapCanvas"), { ssr: false });
 
 const N = curriculum.length;
 const TITLES = curriculum.map((p) => p.title);
-/** Five stages of the journey; parts are 1-based ranges. */
-export const ACTS = [
-  { name: "Foundations", from: 1, to: 3 },
-  { name: "Hands-on testing", from: 4, to: 8 },
-  { name: "Process & automation", from: 9, to: 12 },
-  { name: "Real-world practice", from: 13, to: 16 },
-  { name: "Future & career", from: 17, to: 18 },
-];
 const actOf = (part: number) => ACTS.find((a) => part >= a.from && part <= a.to)!;
 
 const STOP_VH = 70; // scroll length per stop

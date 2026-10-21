@@ -18,3 +18,12 @@ export const curriculum: { title: string; topics: string[] }[] = [
   ["AI in Real-World Software Testing", ["Introduction to AI in Software Testing", "Using AI as a QA Engineer", "AI for Test Case and Scenario Design", "AI for Defect Analysis", "AI for API and Automation Testing", "AI and CI/CD", "AI-Assisted Exploratory Testing", "AI Risks, Privacy and Responsible Use"]],
   ["QA Career and Professional Development", ["Building Your QA Career", "QA Career Paths", "Understanding QA Certifications", "ISTQB Certification Guidance", "Connecting Certification Knowledge to Real Projects", "Building a QA CV and Professional Profile", "Interview and Career Roadmap"]],
 ].map(([title, topics]) => ({ title: title as string, topics: topics as string[] }));
+
+/** The five stages of the journey; parts are 1-based ranges (shared by the roadmap and the home page). */
+export const ACTS = [
+  { name: "Foundations", from: 1, to: 3 },
+  { name: "Hands-on testing", from: 4, to: 8 },
+  { name: "Process & automation", from: 9, to: 12 },
+  { name: "Real-world practice", from: 13, to: 16 },
+  { name: "Future & career", from: 17, to: 18 },
+];

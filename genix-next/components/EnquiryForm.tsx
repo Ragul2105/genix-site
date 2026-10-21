@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Variant = "contact" | "enrol";
 type State = { status: "idle" | "sending" | "ok" | "error"; message?: string };
@@ -8,6 +8,17 @@ type State = { status: "idle" | "sending" | "ok" | "error"; message?: string };
 export default function EnquiryForm({ variant }: { variant: Variant }) {
   const [state, setState] = useState<State>({ status: "idle" });
   const enrol = variant === "enrol";
+  const typeRef = useRef<HTMLSelectElement>(null);
+
+  // links to #business (home page, contact tiles, FAQ) pre-select a business enquiry
+  useEffect(() => {
+    const pick = () => {
+      if (typeRef.current && window.location.hash === "#business") typeRef.current.value = "business";
+    };
+    pick();
+    window.addEventListener("hashchange", pick);
+    return () => window.removeEventListener("hashchange", pick);
+  }, []);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -40,7 +51,7 @@ export default function EnquiryForm({ variant }: { variant: Variant }) {
         <>
           <div className="eb">Send an enquiry</div>
           <label htmlFor="type">I am enquiring as</label>
-          <select id="type" name="type" defaultValue="learner">
+          <select id="type" name="type" defaultValue="learner" ref={typeRef}>
             <option value="learner">A learner (QA programme)</option>
             <option value="business">A business (testing services consultation)</option>
             <option value="other">Other</option>
