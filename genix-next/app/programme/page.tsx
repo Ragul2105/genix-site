@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import PageHero from "@/components/PageHero";
 import Roadmap from "@/components/roadmap/Roadmap";
+import AppStack from "@/components/AppStack";
+import { curriculum } from "@/lib/curriculum";
+import { crossCutting, stackLayers } from "@/lib/project";
 import CtaBand from "@/components/CtaBand";
-import Flow from "@/components/Flow";
-import { journey, layers, logistics } from "@/lib/site";
+import { journey, logistics } from "@/lib/site";
 
 export const metadata: Metadata = { title: "QA Programme" };
 
@@ -35,13 +37,41 @@ export default function Programme() {
         </div>
       </section>
       <Roadmap />
-      <section className="sec">
+      <section className="sec ps" id="project">
         <div className="w">
-          <div className="eb">The project</div>
-          <h2>One e-commerce application, used throughout.</h2>
-          <div style={{ color: "var(--ink2)", fontSize: 18 }}><Flow items={journey} /></div>
-          <div className="layers">{layers.map((l) => <span key={l} className="tag" style={{ background: "var(--tint)", color: "var(--navy)" }}>{l}</span>)}</div>
-          <p style={{ marginTop: 20 }}><Link href="/approach" style={{ fontWeight: 800 }}>See how the approach works →</Link></p>
+          <div className="sec-head">
+            <div style={{ maxWidth: 720 }}>
+              <div className="eb">The project</div>
+              <h2>One e-commerce application, used throughout.</h2>
+              <p className="lead">Every part of the programme works on the same practice store. Here is what is inside it, and where in the curriculum you test each layer.</p>
+            </div>
+            <Link href="/approach#project" className="sec-link">How the approach works <i aria-hidden="true">↗</i></Link>
+          </div>
+          <ol className="ps-journey" aria-label="The customer journey you test">
+            {journey.map((j, i) => <li key={j} className={j === "Payment" ? "hl" : undefined}><b>{String(i + 1).padStart(2, "0")}</b>{j}</li>)}
+          </ol>
+          <div className="ps-grid">
+            <AppStack />
+            <div>
+              <ol className="ps-layers">
+                {stackLayers.map((l, i) => (
+                  <li key={l.key} style={{ ["--c" as string]: l.color }}>
+                    <span className="ps-num">{String(i + 1).padStart(2, "0")}</span>
+                    <div>
+                      <h3>{l.name}</h3>
+                      <p>{l.what}</p>
+                      <p className="ps-tests"><b>You test:</b> {l.tests}</p>
+                      <div className="ps-parts">{l.parts.map((p) => <Link key={p} href="#curriculum">Part {String(p).padStart(2, "0")} · {curriculum[p - 1].title}</Link>)}</div>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+              <div className="ps-cross">
+                <span>Across every layer</span>
+                {crossCutting.map((c) => <Link key={c.name} href="#curriculum"><b>{c.name}</b> Part {String(c.part).padStart(2, "0")}</Link>)}
+              </div>
+            </div>
+          </div>
         </div>
       </section>
       <section className="sec tint">

@@ -386,3 +386,103 @@ html.menu-open{overflow:hidden}
 .rm-plaque.far{opacity:0;transform:scale(.8)}
 .rm-plaque:hover{transform:translateY(-2px)}
 .rm-cta{display:block;text-align:center;margin-top:16px}
+/* ===== The practice app, exploded (AppStack) — after Tanner Wayment's isometric platform diagram ===== */
+.as{position:relative;margin:0 0 0 118px}
+.as img{display:block;width:100%;height:auto}
+.as-tag{position:absolute;transform:translate(calc(-100% - 12px),-50%);display:inline-flex;align-items:center;gap:8px;white-space:nowrap;
+  font-size:13px;font-weight:800;color:var(--navy);background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px 12px 4px 4px;
+  box-shadow:0 6px 16px -10px rgba(11,31,58,.4)}
+.as-tag::after{content:"";position:absolute;right:-12px;top:50%;width:12px;height:2px;background:var(--c)}
+.as-tag b{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--c);color:#fff;font-size:10.5px}
+.as-pay{position:absolute;transform:translate(14px,-140%);font-size:12px;font-weight:800;color:var(--navy);background:var(--yellow);border-radius:999px;padding:4px 10px;white-space:nowrap}
+/* Programme · The project */
+.ps-journey{list-style:none;margin:36px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.ps-journey li{display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:700;color:var(--navy);background:var(--tint);border-radius:999px;padding:6px 12px 6px 6px}
+.ps-journey b{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#fff;color:var(--blue);font-size:10.5px}
+.ps-journey li.hl{background:var(--yellow)}
+.ps-journey li.hl b{color:var(--navy)}
+.ps-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:32px;align-items:start;margin-top:40px}
+.ps-grid>.as{position:sticky;top:96px;margin-top:-30px}
+.ps-layers{list-style:none;margin:0;padding:0}
+.ps-layers li{display:grid;grid-template-columns:40px 1fr;gap:14px;padding:16px 0;border-top:1px solid var(--line)}
+.ps-layers li:first-child{border-top:0;padding-top:0}
+.ps-num{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--c);color:#fff;font-size:12px;font-weight:800}
+.ps-layers h3{font-size:18px;margin:4px 0 4px}
+.ps-layers p{font-size:15px;line-height:1.5}
+.ps-tests{margin-top:6px}
+.ps-tests b{color:var(--navy)}
+.ps-parts{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.ps-parts a{font-size:12.5px;font-weight:700;color:var(--blue);background:var(--tint);border-radius:8px;padding:4px 9px;text-decoration:none}
+.ps-parts a:hover{background:#DCE8FF}
+.ps-cross{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:18px;padding:14px 16px;border-radius:14px;background:var(--navy)}
+.ps-cross span{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--sky);margin-right:4px}
+.ps-cross a{font-size:13px;color:#C5D3EA;text-decoration:none;background:rgba(255,255,255,.08);border-radius:8px;padding:4px 10px}
+.ps-cross a b{color:#fff;margin-right:4px}
+@media (max-width:900px){
+  .ps-grid{grid-template-columns:1fr;gap:24px}
+  .as,.ps-grid>.as{position:relative;top:auto;margin:0 auto;max-width:440px}
+  .as-tag{padding:0;border:0;background:transparent;box-shadow:none;transform:translate(-50%,-50%)}
+  .as-tag::after{display:none}
+  .as-tag{font-size:0;gap:0}
+  .as-tag b{width:24px;height:24px;font-size:11px;box-shadow:0 0 0 3px #fff}
+  .as-pay{font-size:11px}
+}
+/* ===== Our Approach ===== */
+.ap-paths{display:grid;gap:18px;margin-top:44px}
+.ap-path{display:grid;grid-template-columns:200px 1fr;align-items:center;gap:20px;padding:22px 24px;border-radius:20px;border:1px solid var(--line);background:#fff}
+.ap-path-label{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#7C8DA8}
+.ap-path ol{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.ap-path li{display:flex;align-items:center;white-space:nowrap;font-size:15px;font-weight:700;color:var(--ink2);background:#F2F5FA;border-radius:999px;padding:8px 14px}
+.ap-path li:not(:last-child)::after{content:"→";margin-left:10px;color:#9AAAC2;font-weight:600}
+.ap-path.is-genix{border-color:#BFD3FF;background:linear-gradient(90deg,#F4F8FF,#fff)}
+.ap-path.is-genix .ap-path-label{color:var(--blue)}
+.ap-path.is-genix li{color:var(--navy);background:#E6EEFF}
+.ap-path.is-genix li.start{background:var(--yellow)}
+.ap-note{grid-column:2;font-size:13px;font-weight:600;color:var(--blue);margin-top:-6px}
+/* one ticket, eight steps */
+.ap-cycle{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:56px;align-items:start}
+.ap-cycle-side{position:sticky;top:110px}
+.ap-ticket{margin-top:32px;background:var(--navy);color:#fff;border-radius:22px;padding:22px 24px;box-shadow:0 28px 50px -24px rgba(11,31,58,.55)}
+.ap-ticket-dots{display:flex;gap:7px;margin-bottom:16px}.ap-ticket-dots i{width:10px;height:10px;border-radius:50%;background:#FF6B6B}
+.ap-ticket-dots i:nth-child(2){background:var(--yellow)}.ap-ticket-dots i:nth-child(3){background:#4ADE80}
+.ap-ticket-k{display:block;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--sky)}
+.ap-ticket strong{display:block;font-size:22px;line-height:1.25;margin:8px 0 14px}
+.ap-ticket-tags{display:flex;flex-wrap:wrap;gap:6px}
+.ap-ticket-tags span{font-size:12px;font-weight:800;padding:5px 11px;border-radius:999px;background:var(--navy2);color:#9CC1FF}
+.ap-ticket-tags .hi{background:var(--yellow);color:var(--navy)}
+.ap-steps{list-style:none;margin:0;padding:0;position:relative}
+.ap-steps::before{content:"";position:absolute;left:21px;top:22px;bottom:22px;width:2px;background:linear-gradient(#BFD3FF,#BFD3FF 70%,rgba(191,211,255,0))}
+.ap-steps li{position:relative;display:grid;grid-template-columns:44px 1fr;gap:18px;padding:0 0 26px}
+.ap-step-n{position:relative;z-index:1;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:#fff;border:2px solid #BFD3FF;font-size:13px;font-weight:800;color:var(--blue)}
+.ap-steps li.is-do .ap-step-n{background:var(--yellow);border-color:var(--yellow);color:var(--navy)}
+.ap-steps h3{font-size:19px;margin:9px 0 6px}
+.ap-steps h3 small{display:block;font-size:13px;font-weight:600;color:#7C8DA8;margin-top:3px;letter-spacing:0}
+.ap-steps p{font-size:15.5px;line-height:1.55;color:var(--navy);background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.ap-steps li.is-do p{border-color:#F3D27A;background:#FFFBEF}
+.ap-loop{padding-bottom:0!important}
+.ap-loop .ap-step-n{border-style:dashed;font-size:18px}
+.ap-loop p{background:transparent!important;border:0!important;padding:11px 0!important;color:var(--blue)!important;font-weight:700}
+/* continuous project */
+.ap-project{margin-top:44px}
+.ap-prog{list-style:none;margin:0;padding:0;counter-reset:prog}
+.ap-prog li{position:relative;padding:16px 0 16px 20px;border-left:3px solid var(--c)}
+.ap-prog li+li{margin-top:10px}
+.ap-prog-tag{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--c)}
+.ap-prog p{font-size:18px;line-height:1.45;color:var(--navy);margin-top:4px}
+/* beyond e-commerce */
+.ap-table-wrap{margin-top:40px;overflow-x:auto;border-radius:20px;border:1px solid var(--line);background:#fff}
+.ap-table{width:100%;min-width:720px;border-collapse:separate;border-spacing:0;margin:0}
+.ap-table th,.ap-table td{padding:16px 18px;border-bottom:1px solid var(--line);text-align:left;font-size:15px}
+.ap-table tr:last-child th,.ap-table tr:last-child td{border-bottom:0}
+.ap-table thead th{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#7C8DA8;background:#F7F9FC;width:auto}
+.ap-table tbody th{width:120px;font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--blue)}
+.ap-table td{color:var(--navy);font-weight:600}
+.ap-table .here{background:#EEF4FF}
+.ap-table thead .here{color:var(--blue);background:#E3ECFF}
+.ap-small{font-size:13.5px;margin-top:18px;max-width:820px}
+@media (max-width:900px){
+  .ap-path{grid-template-columns:1fr;gap:12px}
+  .ap-note{grid-column:1}
+  .ap-cycle{grid-template-columns:1fr;gap:32px}
+  .ap-cycle-side{position:static}
+}
