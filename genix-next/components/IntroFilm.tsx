@@ -62,8 +62,9 @@ export default function IntroFilm() {
   };
 
   return (
-    <figure className={`film${started ? " is-started" : ""}${playing ? " is-playing" : ""}`}>
-      <div className="film-frame">
+    // play state lives on the frame: the figure's class list belongs to the reveal system (it adds is-in)
+    <figure className="film">
+      <div className={`film-frame${started ? " is-started" : ""}${playing ? " is-playing" : ""}`}>
         <video
           ref={video}
           muted

@@ -716,10 +716,10 @@ a.ct-intent:hover{transform:translateY(-3px);border-color:#BFD3FF;box-shadow:0 1
 .film-meta button:focus-visible{outline:3px solid var(--yellow)}
 .film-progress{position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(255,255,255,.15);z-index:2;opacity:0;transition:opacity .4s}
 .film-progress span{display:block;height:100%;background:var(--yellow);transform-origin:left;transform:scaleX(0)}
-.film.is-playing .film-frame::after,.film.is-playing .film-cap{opacity:0}
-.film.is-playing .film-play{opacity:0}
-.film.is-playing .film-frame:hover .film-play{opacity:1}
-.film.is-started .film-progress{opacity:1}
+.film-frame.is-playing::after,.film-frame.is-playing .film-cap{opacity:0}
+.film-frame.is-playing .film-play{opacity:0}
+.film-frame.is-playing:hover .film-play{opacity:1}
+.film-frame.is-started .film-progress{opacity:1}
 
 /* facts strip */
 .facts{position:relative;z-index:2;margin-top:-64px}
