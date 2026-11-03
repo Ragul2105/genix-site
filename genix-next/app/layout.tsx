@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Caveat, Plus_Jakarta_Sans } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SmoothScroll from "@/components/SmoothScroll";
@@ -14,7 +14,6 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 // handwritten note in the home hero ("Learn, Practice, Build, Grow")
-const caveat = Caveat({ variable: "--font-script", subsets: ["latin"], weight: ["600"] });
 
 export const metadata: Metadata = {
   title: { default: "Industry-Ready QA & Software Testing Programme | Genix Solutions", template: "%s | Genix Solutions" },
@@ -23,7 +22,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${jakarta.variable} ${caveat.variable}`} suppressHydrationWarning>
+    <html lang="en" className={jakarta.variable} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: revealBootScript }} />
         <style dangerouslySetInnerHTML={{ __html: revealCss }} />

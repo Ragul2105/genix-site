@@ -75,7 +75,6 @@ export default function Home() {
           </div>
           <div className="h2o-media">
             <IntroFilm />
-            <p className="h2o-note" aria-hidden="true">Learn<br />Practice<br />Build<br />Grow<svg viewBox="0 0 120 30"><path d="M4 22 C 40 8, 80 6, 116 12" /></svg></p>
           </div>
         </div>
       </section>

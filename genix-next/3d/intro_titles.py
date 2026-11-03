@@ -1,5 +1,5 @@
 """
-Titles for "The Quality Line" intro: composites typography over the Blender frames and encodes the film.
+Titles for the company introduction film: composites typography over the Blender frames and encodes the film.
 
   python3 3d/intro_titles.py <frames-dir> <out.mp4>             # full film (pipes into ffmpeg)
   python3 3d/intro_titles.py <frames-dir> <out-dir> --stills 60,300  # check a few frames as PNG
@@ -34,23 +34,27 @@ def ease_in(x):
     x = max(0.0, min(1.0, x))
     return x * x
 
-# ------------------------------------------------------------------ copy and timing (seconds), matched to build_intro.py
+# ------------------------------------------------------------------ copy and timing (seconds), matched to build_film.py; the copy is the client's own
 CHAPTERS = [
-    dict(t0=0.0, t1=5.0, logo=True, title=("Practical QA training.", "Reliable software testing."),
-         meta="QA training for learners · Testing services for businesses"),
-    dict(t0=5.0, t1=13.0, chip=("01", "Foundation programme"), title=("Start with the", "fundamentals."),
-         pills=["SDLC & Agile", "Requirements", "Test cases", "Functional & regression", "Defects"],
-         meta="3 months · 3 live classes a week · 1 hour each"),
-    dict(t0=13.0, t1=21.0, chip=("02", "Advanced programme"), title=("Build technical", "QA skills."),
-         pills=["API testing", "SQL & databases", "Test automation", "Git & CI/CD"],
-         meta="3 months · for learners with manual testing knowledge"),
-    dict(t0=21.0, t1=30.0, chip=("03", "One real project"), title=("Test one e-commerce app,", "end to end."),
-         journey=True),
-    dict(t0=30.0, t1=37.0, chip=("04", "Testing services"), title=("Manual and automation", "testing for your product."),
-         pills=["Functional", "Regression", "API & integration", "Automation suites", "Release support"]),
-    dict(t0=37.0, t1=42.0, end=True),
+    dict(t0=0.0, t1=6.0, logo=True, title=("Practical QA skills.", "Reliable software quality."),
+         sub="Two connected services: industry-ready QA training and offshore software testing."),
+    dict(t0=6.0, t1=12.0, chip=("01", "Foundation programme"), title=("Start with the", "fundamentals."),
+         sub="A beginner-friendly pathway for learners starting their journey in software testing.",
+         meta="3 months  ·  3 classes a week  ·  1 hour per class"),
+    dict(t0=12.0, t1=18.0, chip=("02", "Advanced programme"), title=("Build professional", "QA skills."),
+         sub="For learners with manual testing knowledge who are ready to develop technical QA skills.",
+         meta="3 months  ·  3 classes a week  ·  1 hour per class"),
+    dict(t0=18.0, t1=24.0, chip=("03", "Practical learning"), title=("One continuous, realistic", "e-commerce project."),
+         sub="Follow a customer journey and practise testing from product discovery to order completion.",
+         meta="Understand  ·  Practise  ·  Review  ·  Build confidence", journey=True),
+    dict(t0=24.0, t1=30.0, chip=("04", "Offshore testing services"), title=("Manual testing.", "Automation testing."),
+         sub="Flexible QA support for businesses across the software testing lifecycle."),
+    dict(t0=30.0, t1=36.0, chip=("05", "End-to-end QA support"), title=("From requirements", "to release confidence."),
+         sub="We work alongside your team with practical QA support, clear communication and meaningful testing insights."),
+    dict(t0=36.0, t1=42.0, end=True),
 ]
-T_STOP, T_GO = 22.4, 27.4
+JOURNEY = ["Search", "Product", "Cart", "Login", "Address", "Delivery", "Payment", "Order"]
+J0, JSTEP = 18.5, 0.62   # step i lights at J0 + i*JSTEP, as the camera reaches its screen
 
 # ------------------------------------------------------------------ drawing helpers (all coordinates in 1920×1080 space)
 def S(v):
@@ -70,6 +74,17 @@ def tracked(d, xy, s, w, size, fill, alpha, track):
 
 def width(s, w, size):
     return font(w, size).getlength(s) / SS
+
+def wrap(s, w, size, maxw):
+    lines, cur = [], ""
+    for word in s.split():
+        t = (cur + " " + word).strip()
+        if cur and width(t, w, size) > maxw:
+            lines.append(cur)
+            cur = word
+        else:
+            cur = t
+    return lines + [cur]
 
 def pill(d, x, y, label, alpha, fill="#12294A", fg="#EAF1FB", border="#2D5285", size=24, padx=22, h=52):
     tw = width(label, 700, size)
@@ -105,17 +120,23 @@ def lockup(d, x, y, size, alpha):
     tracked(d, (x + size * 1.1, y + size * 0.62), "SOLUTIONS", 700, int(size * 0.17), ACC, alpha, size * 0.05)
 
 # ------------------------------------------------------------------ the wash: full strength behind the type, easing to nothing by ~60% width
-_wash = None
-def wash_layer(strength):
-    global _wash
-    if _wash is None:
-        import numpy as np
-        x = np.linspace(0, 1, S(W))
-        f = np.clip((x - 0.26) / (0.62 - 0.26), 0, 1)
-        f = 1 - f * f * (3 - 2 * f)
-        _wash = (np.tile(f, (S(H), 1)) * 0.82).astype("float32")
+_wash = {}
+def wash_layer(strength, kind="side"):
+    """side: behind the titles, easing out by ~62% width. end: wider, for the closing card. foot: a band under the journey strip."""
     import numpy as np
-    a = Image.fromarray((_wash * strength * 255).astype("uint8"))
+    if kind not in _wash:
+        if kind == "foot":
+            y = np.linspace(0, 1, S(H))
+            f = np.clip((y - 0.70) / (0.84 - 0.70), 0, 1)
+            f = f * f * (3 - 2 * f)
+            _wash[kind] = (np.tile(f[:, None], (1, S(W))) * 0.78).astype("float32")
+        else:
+            lo, hi, k = (0.26, 0.62, 0.82) if kind == "side" else (0.42, 0.86, 0.86)
+            x = np.linspace(0, 1, S(W))
+            f = np.clip((x - lo) / (hi - lo), 0, 1)
+            f = 1 - f * f * (3 - 2 * f)
+            _wash[kind] = (np.tile(f, (S(H), 1)) * k).astype("float32")
+    a = Image.fromarray((_wash[kind] * strength * 255).astype("uint8"))
     layer = Image.new("RGBA", (S(W), S(H)), rgb("#061224"))
     layer.putalpha(a)
     return layer
@@ -149,25 +170,30 @@ def draw_titles(t):
     # wash
     sa = scrim(t, ch)
     if sa > 0:
-        img.alpha_composite(wash_layer(sa), (0, 0))
+        img.alpha_composite(wash_layer(sa, "end" if ch.get("end") else "side"), (0, 0))
+        if ch.get("journey"):
+            img.alpha_composite(wash_layer(sa, "foot"), (0, 0))
         d = ImageDraw.Draw(img)
 
     if ch.get("end"):
         a, dy = a_y(nxt(0.12))
-        lockup(d, X0, 330 + dy, 120, a)
+        lockup(d, X0, 268 + dy, 110, a)
         a, dy = a_y(nxt(0.12))
-        text(d, (X0, 510 + dy), "Build QA skills.", 800, 66, HEAD, a)
+        text(d, (X0, 440 + dy), "Build your QA skills.", 800, 64, HEAD, a)
         a, dy = a_y(nxt(0.12))
-        text(d, (X0, 592 + dy), "Deliver better software.", 800, 66, ACC, a)
+        text(d, (X0, 520 + dy), "Strengthen your software quality.", 800, 64, ACC, a)
         a, dy = a_y(nxt(0.12))
-        text(d, (X0, 720 + dy), "QA training  ·  Offshore software testing", 600 if False else 500, 30, INK, a)
+        wpx = pill(d, X0, 650 + dy, "Explore our programmes", a, fill=YELLOW, fg=NAVY, border=None, size=26, padx=30, h=66)
+        pill(d, X0 + wpx + 18, 650 + dy, "Discuss testing services", a, fill="#0F2747", fg=HEAD, border="#6EA8FF", size=26, padx=30, h=66)
+        a, dy = a_y(nxt(0.12))
+        tracked(d, (X0, 780 + dy), "LEARN  ·  TEST  ·  IMPROVE", 700, 22, ACC, a, 3)
         return img
 
-    y = 300 if ch.get("logo") else 286
+    y = 216 if ch.get("journey") else 286   # three lines of copy and the strip below: start higher
     if ch.get("logo"):
         a, dy = a_y(nxt())
-        lockup(d, X0, 170 + dy, 84, a)
-        y = 330
+        lockup(d, X0, 190 + dy, 84, a)
+        y = 340
     if ch.get("chip"):
         a, dy = a_y(nxt())
         n, label = ch["chip"]
@@ -176,32 +202,36 @@ def draw_titles(t):
         y += 78
     for i, line in enumerate(ch["title"]):
         a, dy = a_y(nxt(), 34)
-        text(d, (X0, y + dy), line, 800, 70, HEAD if i == 0 else ACC, a)
-        y += 86
-    y += 26
-    if ch.get("pills"):
-        x, row = X0, 0
-        for p in ch["pills"]:
-            a, dy = a_y(nxt(0.07), 18)
-            tw = width(p, 700, 24) + 44
-            if x + tw > X0 + 760:
-                x, row = X0, row + 1
-            pill(d, x, y + row * 64 + dy, p, a)
-            x += tw + 12
-        y += (row + 1) * 64 + 18
+        text(d, (X0, y + dy), line, 800, 66, HEAD if i == 0 else ACC, a)
+        y += 80
+    y += 22
+    if ch.get("sub"):
+        a, dy = a_y(nxt())
+        for line in wrap(ch["sub"], 500, 29, 700):
+            text(d, (X0, y + dy), line, 500, 29, INK, a)
+            y += 42
+        y += 22
     if ch.get("meta"):
         a, dy = a_y(nxt())
-        text(d, (X0, y + dy), ch["meta"], 500, 28, INK, a)
+        text(d, (X0, y + dy), ch["meta"], 700, 24, YELLOW, a)
     if ch.get("journey"):
-        # what happens on the line, in one caption that changes with the story
-        cap_a, dy = a_y(nxt(), 12)
-        if t < T_STOP - 0.6:
-            cap, col = "Search, product, cart, payment, order: one journey, every module.", INK
-        elif t < T_GO - 0.9:
-            cap, col = "Defect found: a payment retry charges the customer twice.", RED
-        else:
-            cap, col = "Fixed, retested, and released.", GREEN
-        text(d, (X0, y + dy), cap, 700, 28, col, cap_a)
+        # the eight stops, lighting up as the camera reaches each screen
+        n, gap = len(JOURNEY), 26
+        bw = (W - 2 * X0 - (n - 1) * gap) / n
+        for i, name in enumerate(JOURNEY):
+            a, dy = a_y(nxt(0.05), 16)
+            lit = t >= J0 + i * JSTEP
+            bad = name == "Payment" and lit and t < J0 + 7 * JSTEP + 0.25
+            x0, y0 = X0 + i * (bw + gap), 920 + dy
+            if a > 0:
+                border = (RED if bad else YELLOW) if lit else "#2D5285"
+                d.rounded_rectangle((S(x0), S(y0), S(x0 + bw), S(y0 + 84)), radius=S(16), fill=rgb("#12305A" if lit else "#0D2240", int(235 * a)),
+                                    outline=rgb(border, int(255 * a)), width=S(2))
+                text(d, (x0 + 18, y0 + 12), f"{i + 1:02d}", 700, 18, (RED if bad else YELLOW) if lit else SKY, a)
+                text(d, (x0 + 18, y0 + 40), name, 700, 24, HEAD if lit else INK, a)
+                if i:
+                    cx, cy = x0 - gap / 2, y0 + 42
+                    d.line([(S(cx - 4), S(cy - 7)), (S(cx + 3), S(cy)), (S(cx - 4), S(cy + 7))], fill=rgb(SKY, int(200 * a)), width=S(2.5))
     return img
 
 def compose(frame_png, t):

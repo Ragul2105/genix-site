@@ -228,6 +228,107 @@ for i, (lab, val, col) in enumerate([("Passed", "246", GREEN), ("Fixed & reteste
     c.d.ellipse(c.box(30, y + 6, 42, y + 18), fill=rgba(col)); c.text(54, y, lab, 500, 16, TXT); c.text(490, y, val, 800, 16, col, anchor="ra")
 c.save("summary")
 
+# ------------------------------------------------------------------ the rest of the shop journey: login, address, delivery
+c = browser(360, 460, "shop.test/login")
+c.text(24, 80, "Sign in to continue", 800, 20, TXT)
+c.text(24, 126, "Email", 500, 13, MUTED)
+c.rect(24, 148, 336, 188, "#0A1C36", r=10); c.text(40, 159, "learner@shop.test", 400, 15, TXT, mono=True)
+c.text(24, 206, "Password", 500, 13, MUTED)
+c.rect(24, 228, 336, 268, "#0A1C36", r=10); c.text(40, 239, "••••••••••", 400, 15, TXT, mono=True)
+c.rect(24, 296, 336, 342, BLUE, r=12); c.text(180, 319, "Sign in", 800, 16, "#FFFFFF", anchor="mm")
+c.text(24, 430, "Login", 800, 18, TXT)
+c.save("shop_login")
+
+c = browser(360, 460, "shop.test/checkout/address")
+for i, (lab, val) in enumerate([("Full name", "Priya Raman"), ("Address", "4B, Lake View Road"), ("City and PIN", "Chennai 600042")]):
+    y = 74 + i * 80
+    c.text(24, y, lab, 500, 13, MUTED)
+    c.rect(24, y + 22, 336, y + 62, "#0A1C36", r=10); c.text(40, y + 33, val, 500, 15, TXT)
+c.rect(24, 330, 336, 376, BLUE, r=12); c.text(180, 353, "Deliver here", 800, 16, "#FFFFFF", anchor="mm")
+c.text(24, 430, "Address", 800, 18, TXT)
+c.save("shop_address")
+
+c = browser(360, 460, "shop.test/checkout/delivery")
+for i, (name, when, price) in enumerate([("Standard", "3 to 5 days", "Free"), ("Express", "Next day", "Rs 99")]):
+    y = 76 + i * 92
+    c.rect(24, y, 336, y + 78, CARD2, r=12, outline=SKY if i == 0 else None)
+    c.d.ellipse(c.box(40, y + 28, 60, y + 48), outline=rgba(SKY), width=2 * S)
+    if i == 0:
+        c.d.ellipse(c.box(45, y + 33, 55, y + 43), fill=rgba(SKY))
+    c.text(74, y + 16, name, 700, 16, TXT); c.text(74, y + 42, when, 500, 14, MUTED)
+    c.text(320, y + 28, price, 800, 15, YEL, anchor="ra")
+c.rect(24, 330, 336, 376, BLUE, r=12); c.text(180, 353, "Continue to payment", 800, 15, "#FFFFFF", anchor="mm")
+c.text(24, 430, "Delivery", 800, 18, TXT)
+c.save("shop_delivery")
+
+# ------------------------------------------------------------------ cards that carry the company's own content
+def svc_card(name, mark, chip, title, sub, items, col):
+    """A service card: coloured edge, letter mark, title and four ticked lines."""
+    c = Card(500, 330, None, bar=False)
+    c.rect(0, 30, 6, 300, col, r=3)
+    c.d.ellipse(c.box(28, 30, 80, 82), fill=rgba(col))
+    c.text(54, 56, mark, 800, 24, "#FFFFFF", anchor="mm")
+    c.text(100, 30, title, 800, 26, TXT); c.text(100, 64, sub, 500, 16, MUTED)
+    if chip:
+        c.pill(500 - 28 - c.width(chip, 700, 13) - 24, 34, chip, SKY, "#1C3A63", size=13, h=26)
+    c.d.line([c.p(28, 108), c.p(472, 108)], fill=rgba(LINE), width=2 * S)
+    for i, it in enumerate(items):
+        y = 140 + i * 44
+        tick(c, 40, y + 10, colour=col, r=10); c.text(62, y, it, 500, 18, TXT)
+    c.save(name)
+
+svc_card("intro_training", "T", "For learners", "QA Training", "Foundation + Advanced",
+         ["Foundation programme, 3 months", "Advanced programme, 3 months", "Live online classes", "One real e-commerce project"], GREEN)
+svc_card("intro_services", "S", "For businesses", "QA Services", "Manual + Automation",
+         ["Manual testing", "Test automation", "End-to-end QA support", "Flexible engagement"], BLUE)
+svc_card("svc_manual", "M", None, "Manual testing", "Offshore testing services",
+         ["Functional testing", "Regression testing", "API and integration testing", "Database validation"], GREEN)
+svc_card("svc_auto", "A", None, "Test automation", "Offshore testing services",
+         ["Automated functional tests", "Regression suites", "Execution and reporting", "Automation maintenance"], BLUE)
+
+def programme(name, label, modules, col):
+    """A programme card; state k has the first k modules ticked off and the next one active."""
+    n = len(modules)
+    for st in range(n + 1):
+        c = Card(560, 178 + n * 64, None, bar=False)
+        c.rect(0, 30, 6, 148 + n * 64, col, r=3)
+        c.pill(28, 28, label, NAVY, col, size=13, h=28)
+        c.text(28, 74, "3-month programme", 800, 26, TXT)
+        c.text(28, 110, "3 classes per week  ·  1 hour per class", 500, 16, MUTED)
+        for i, (tag, mod) in enumerate(modules):
+            y = 158 + i * 64
+            done, active = i < st, i == st
+            c.rect(20, y, 540, y + 52, CARD2, r=12, outline=YEL if active else None)
+            c.pill(34, y + 13, tag, TXT if not done else NAVY, col if done else "#1C3A63", size=12, h=26, padx=10)
+            c.text(118, y + 14, mod, 700, 17, TXT if (done or active) else MUTED)
+            if done:
+                tick(c, 516, y + 26, colour=col, r=11)
+        c.save(f"{name}_{st}")
+
+programme("found", "Foundation  ·  01", [("01", "SDLC & Agile"), ("02", "Requirements"), ("03", "Test cases"),
+                                         ("04", "Functional & regression"), ("05", "Defects & QA practice")], GREEN)
+programme("adv", "Advanced  ·  02", [("Postman", "API testing"), ("SQL", "SQL & database validation"),
+                                     ("Auto", "Test automation"), ("CI", "Git & CI/CD")], SKY)
+
+# ------------------------------------------------------------------ end-to-end QA support: the five steps, lit in turn
+FLOW = [("Understand", "requirements"), ("Plan & design", "tests"), ("Execute &", "automate"), ("Manage", "defects"), ("Retest &", "report")]
+for state in range(len(FLOW) + 1):
+    c = Card(1080, 270, "QA support  ·  release 2.4")
+    for i, (a, b) in enumerate(FLOW):
+        x = 108 + i * 216
+        done, running = i < state, i == state
+        if i:
+            c.d.line([c.p(x - 186, 130), c.p(x - 30, 130)], fill=rgba(GREEN if done else LINE), width=4 * S)
+        col = GREEN if done else (YEL if running else "#1C3A63")
+        c.d.ellipse(c.box(x - 26, 104, x + 26, 156), fill=rgba(col))
+        if done:
+            c.d.line([c.p(x - 11, 131), c.p(x - 3, 139), c.p(x + 12, 121)], fill=rgba("#FFFFFF"), width=4 * S, joint="curve")
+        else:
+            c.text(x, 130, f"0{i + 1}", 800, 16, NAVY if running else MUTED, anchor="mm")
+        fg = TXT if (done or running) else MUTED
+        c.text(x, 176, a, 700, 16, fg, anchor="ma"); c.text(x, 198, b, 700, 16, fg, anchor="ma")
+    c.save(f"flow_{state}")
+
 # ------------------------------------------------------------------ backdrop: deep navy with a soft blue bloom
 W, H = 3840, 2160
 bg = Image.new("RGBA", (W, H), rgba("#071427"))

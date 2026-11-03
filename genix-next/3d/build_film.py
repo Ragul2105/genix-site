@@ -1,12 +1,14 @@
 """
 The hero film (42 s): realistic QA screens floating in deep-navy space, in the site's palette.
 
-  1 · opening   a constellation of QA screens
-  2 · Foundation test cases pass one by one, the payment retry fails, BUG-142 is raised
-  3 · Advanced   API request → SQL check → automated run going green
-  4 · project    the five shop screens; payment flags "charged twice", then "retested"
-  5 · services   a release pipeline lights up, with the run summary
-  6 · ending     the camera pulls back over everything (titles carry the logo)
+Seven 6-second chapters, carrying the same information as the client's sample:
+  1 · introduction  the two services, QA Training and QA Services, in a constellation of QA screens
+  2 · Foundation    the programme card ticks through its five modules; test cases run; BUG-142 is raised
+  3 · Advanced      the programme card, with API, SQL, automated run and CI pipeline around it
+  4 · project       the eight shop screens, search to order; payment flags "charged twice", then "retested"
+  5 · services      manual testing and test automation
+  6 · QA support    the five steps from requirements to release, then the run summary
+  7 · closing       the camera pulls back over everything (titles carry the logo and the calls to action)
 
 Screens come from film_ui.py; titles are composited by intro_titles.py.
 
@@ -138,74 +140,79 @@ def slide_in(o, f0, offset=Vector((0.6, -0.4, -0.3)), dur=18):
         for k in fc.keyframe_points:
             k.interpolation, k.easing = "EXPO", "EASE_OUT"
 
-# ---------------------------------------------------------------- the chapters, laid out along x
+# ---------------------------------------------------------------- the chapters (6 s each, as in the client's sample), laid out along x
 END = scene.frame_end + 10
-everything = []
 
-# 1 · opening constellation (x≈0)
-c1 = [panel("cases_0", (-1.2, 3.0, 1.3), (0, 0, 0.12), 0.9), panel("api", (2.6, 5.5, -0.9), (0, 0, -0.15)),
-      panel("shop_search", (4.8, 1.8, 1.0), (0, 0, -0.25)), panel("summary", (0.8, 8.5, -1.9), (0, 0, 0.05)),
-      panel("pipe_3", (3.2, 11.0, 2.4), (0, 0, -0.1)), panel("shop_order", (-3.6, 9.0, -1.4), (0, 0, 0.3)),
-      panel("sql", (7.4, 7.5, 1.9), (0, 0, -0.35), 0.8)]
-for i, o in enumerate(c1):
-    drift([o], seed=i)
+# 1 · company introduction (x≈0): the two services up front, a constellation of QA screens behind
+intro = [panel("intro_training", (4.8, 0.4, 1.3), (0, 0, 0.12)), panel("intro_services", (5.9, -0.6, -1.0), (0, 0, -0.12))]
+slide_in(intro[0], F(0.3), Vector((-0.4, -0.6, 0.5)), 24)
+slide_in(intro[1], F(0.8), Vector((0.6, -0.6, -0.5)), 24)
+drift([intro[0]], seed=1); drift([intro[1]], seed=2)
+for i, (n, loc, rz) in enumerate((("cases_0", (-1.6, 6.0, 2.4), 0.12), ("api", (5.6, 7.5, 2.0), -0.15), ("shop_search", (7.2, 4.2, -1.2), -0.25),
+                                  ("summary", (1.8, 9.5, -2.8), 0.05), ("pipe_3", (2.6, 13.0, 3.6), -0.1), ("shop_order", (-3.4, 9.0, -1.6), 0.3))):
+    drift([panel(n, loc, (0, 0, rz), 0.85)], seed=3 + i)
 
-# 2 · Foundation (x≈30): cases pass row by row, the retry fails, the bug is raised
+# 2 · Foundation (x≈30): the programme card ticks through its modules; test cases run behind; the defect is raised
 X2 = 30.0
-tc = [F(5.0), F(6.3), F(7.1), F(7.9), F(8.7), F(9.6), F(10.3)]
-cases = states([f"cases_{i}" for i in range(7)], (X2, 0, 0.2), tc, (0, 0, 0.18))
-drift(cases, seed=11)
-bug = panel("bug", (X2 + 2.4, -1.4, -0.9), (0, 0, -0.12), 0.95)
+found = states([f"found_{i}" for i in range(6)], (X2 + 2.2, -0.6, 0.0), [F(6.0), F(6.8), F(7.5), F(8.2), F(8.9), F(9.6)], (0, 0, -0.14))
+cases = states([f"cases_{i}" for i in range(7)], (X2 - 1.6, 2.4, 0.9), [F(6.0), F(7.0), F(7.7), F(8.4), F(9.1), F(9.8), F(10.3)], (0, 0, 0.22), 0.9)
+bug = panel("bug", (X2 + 4.8, 1.6, -1.6), (0, 0, -0.3), 0.85)
 show(bug, [(F(10.4), END)])
 slide_in(bug, F(10.4))
-drift([bug], seed=12)
-for i, (n, loc) in enumerate((("shop_cart", (X2 - 3.5, 7, 1.8)), ("api", (X2 + 5.5, 9, 2.4)), ("summary", (X2 + 1.5, 12, -2.6)))):
-    drift([panel(n, loc, (0, 0, 0.2 - 0.2 * i), 0.9)], seed=20 + i)
+drift(found, seed=11); drift(cases, seed=12); drift([bug], seed=13)
+for i, (n, loc) in enumerate((("shop_cart", (X2 - 4.5, 8, 2.0)), ("summary", (X2 + 6.5, 11, 2.6)))):
+    drift([panel(n, loc, (0, 0, 0.2 - 0.3 * i), 0.85)], seed=20 + i)
 
-# 3 · Advanced (x≈60): API, then the SQL check, then the automated run
+# 3 · Advanced (x≈60): the programme card; API, SQL, automation and CI around it
 X3 = 60.0
-api = panel("api", (X3 - 2.6, 1.2, 0.9), (0, 0, 0.32))
-sql = panel("sql", (X3 + 0.4, -0.6, -1.0), (0, 0, 0.1), 0.9)
-runs = states([f"run_{i}" for i in range(7)], (X3 + 3.6, 0.4, 0.6), [F(13.0), F(16.2), F(16.8), F(17.4), F(18.0), F(18.6), F(19.3)], (0, 0, -0.2))
-drift([api], seed=31); drift([sql], seed=32); drift(runs, seed=33)
-for i, (n, loc) in enumerate((("pipe_2", (X3 - 1, 10, 3.2)), ("cases_6", (X3 + 7, 9, -2.2)))):
-    drift([panel(n, loc, (0, 0, -0.1 + 0.2 * i), 0.9)], seed=40 + i)
+adv = states([f"adv_{i}" for i in range(5)], (X3 + 2.2, -0.6, 0.1), [F(12.0), F(12.8), F(13.6), F(14.4), F(15.2)], (0, 0, -0.14))
+api = panel("api", (X3 - 1.6, 2.2, 1.2), (0, 0, 0.26), 0.85)
+sql = panel("sql", (X3 - 1.0, 3.2, -1.6), (0, 0, 0.2), 0.8)
+runs = states([f"run_{i}" for i in range(7)], (X3 + 5.8, 1.8, 1.0), [F(12.0), F(14.4), F(14.8), F(15.2), F(15.6), F(16.0), F(16.5)], (0, 0, -0.32), 0.8)
+pipes = states([f"pipe_{i}" for i in range(6)], (X3 + 4.6, 3.6, -2.2), [F(12.0), F(15.2), F(15.8), F(16.4), F(17.0), F(17.6)], (0, 0, -0.2), 0.75)
+drift(adv, seed=31); drift([api], seed=32); drift([sql], seed=33); drift(runs, seed=34); drift(pipes, seed=35)
 
-# 4 · the project (x≈90): five shop screens in a gentle arc; payment fails, then passes
+# 4 · the project (x≈90): eight shop screens in a shallow arc, walked in order; payment fails, then passes
 X4 = 90.0
-T_STOP, T_GO = 22.4, 27.4
-shop = []
-for i, n in enumerate(["shop_search", "shop_product", "shop_cart", None, "shop_order"]):
-    loc = (X4 - 6.0 + i * 3.0, 0.9 * abs(i - 3) ** 1.2, 0.15 * math.sin(i))
-    rot = (0, 0, 0.14 * (i - 3))
+JOURNEY = ["shop_search", "shop_product", "shop_cart", "shop_login", "shop_address", "shop_delivery", None, "shop_order"]
+for i, n in enumerate(JOURNEY):
+    u = i - 3.5
+    loc = (X4 + u * 1.7, 0.1 * u * u, 0.1 * math.sin(i * 1.3) + 0.35)
+    rot = (0, 0, 0.04 * u)
     if n:
-        shop.append(panel(n, loc, rot))
+        drift([panel(n, loc, rot, 0.8)], seed=50 + i, amp=0.04)
     else:
-        pay = states(["shop_pay_0", "shop_pay_1", "shop_pay_2"], loc, [F(21.0), F(T_STOP), F(T_GO)], rot)
-for j, o in enumerate(shop):
-    drift([o], seed=50 + j, amp=0.04)
-drift(pay, seed=55, amp=0.04)
-drift([panel("bug", (X4 + 5.2, 5.0, 2.2), (0, 0, -0.3), 0.8)], seed=56)
+        drift(states(["shop_pay_0", "shop_pay_1", "shop_pay_2"], loc, [F(18.0), F(22.2), F(23.1)], rot, 0.8), seed=50 + i, amp=0.04)
 
-# 5 · services (x≈120): the release pipeline, then the summary
+# 5 · offshore testing services (x≈120): manual and automation, with a run and a check behind
 X5 = 120.0
-pipes = states([f"pipe_{i}" for i in range(6)], (X5 + 0.6, 0, 0.9), [F(30.0), F(31.0), F(31.9), F(32.8), F(33.7), F(34.6)], (0, 0, 0.12))
-summ = panel("summary", (X5 + 2.8, -1.2, -1.3), (0, 0, -0.16), 0.95)
-show(summ, [(F(35.0), END)])
-slide_in(summ, F(35.0), Vector((0.5, -0.3, -0.5)))
-drift(pipes, seed=61); drift([summ], seed=62)
-for i, (n, loc) in enumerate((("run_6", (X5 - 4, 8, 2.5)), ("shop_order", (X5 + 6.5, 9, -1.5)), ("cases_6", (X5 + 2, 13, 3.0)))):
+man = panel("svc_manual", (X5 + 0.4, -0.2, 0.9), (0, 0, 0.1))
+aut = panel("svc_auto", (X5 + 3.4, -1.0, -0.8), (0, 0, -0.12))
+slide_in(man, F(24.2), Vector((-0.5, -0.5, 0.4)), 22)
+slide_in(aut, F(24.7), Vector((0.6, -0.5, -0.4)), 22)
+drift([man], seed=61); drift([aut], seed=62)
+for i, (n, loc) in enumerate((("run_6", (X5 - 3.2, 6, 2.4)), ("sql", (X5 + 6.8, 6, 2.2)), ("cases_6", (X5 + 2.0, 10, -2.8)))):
     drift([panel(n, loc, (0, 0, 0.15 - 0.15 * i), 0.85)], seed=70 + i)
 
-# 6 · ending (x≈150): a curved wall of every screen, for the camera to pull back from
+# 6 · end-to-end QA support (x≈150): the five steps light up, then the run summary
 X6 = 150.0
-wall = ["cases_6", "api", "shop_search", "run_6", "bug", "pipe_5", "sql", "shop_pay_2", "summary", "shop_cart", "cases_3", "shop_order",
-        "pipe_2", "shop_product", "run_3"]
+flow = states([f"flow_{i}" for i in range(6)], (X6 + 2.4, 0, 1.7), [F(30.0), F(30.9), F(31.7), F(32.5), F(33.3), F(34.1)], (0, 0, 0.06))
+summ = panel("summary", (X6 + 3.8, -1.2, -1.5), (0, 0, -0.16), 0.9)
+show(summ, [(F(34.2), END)])
+slide_in(summ, F(34.2), Vector((0.5, -0.3, -0.5)))
+drift(flow, seed=81); drift([summ], seed=82)
+for i, (n, loc) in enumerate((("bug", (X6 - 3.4, 7, -2.0)), ("pipe_5", (X6 + 6.0, 9, 2.8)))):
+    drift([panel(n, loc, (0, 0, 0.15 - 0.3 * i), 0.85)], seed=85 + i)
+
+# 7 · closing (x≈180): a curved wall of every screen, for the camera to pull back from
+X7 = 180.0
+wall = ["found_5", "api", "shop_search", "run_6", "intro_services", "flow_5", "sql", "shop_pay_2", "adv_4", "shop_cart",
+        "intro_training", "shop_order", "svc_manual", "shop_delivery", "svc_auto"]
 for i, n in enumerate(wall):
     col, row = i % 5, i // 5
     ang = (col - 2) * 0.26
-    loc = (X6 + 9.0 * math.sin(ang), 9.0 * (1 - math.cos(ang)) + random.uniform(-0.6, 0.6), (1 - row) * 3.0 + random.uniform(-0.3, 0.3))
-    drift([panel(n, loc, (0, 0, -ang), 0.82)], seed=90 + i, amp=0.05)
+    loc = (X7 + 9.0 * math.sin(ang), 9.0 * (1 - math.cos(ang)) + random.uniform(-0.6, 0.6), (1 - row) * 3.2 + random.uniform(-0.3, 0.3))
+    drift([panel(n, loc, (0, 0, -ang), 0.8)], seed=90 + i, amp=0.05)
 
 # dust: tiny glints that turn into soft bokeh with depth of field
 dust_m = bpy.data.materials.new("dust")
@@ -217,7 +224,7 @@ em.inputs["Color"].default_value = srgb("#6EA8FF")
 em.inputs["Strength"].default_value = 2.2
 dust_m.node_tree.links.new(em.outputs[0], dn["Material Output"].inputs["Surface"])
 for i in range(260):
-    x = random.uniform(-14, 166)
+    x = random.uniform(-14, 196)
     bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=random.uniform(0.012, 0.03),
                                           location=(x, random.uniform(-4, 22), random.uniform(-6, 7)))
     bpy.context.active_object.data.materials.append(dust_m)
@@ -254,27 +261,30 @@ def view(look, dist, side=0.0, up=0.6):
 
 SH = -0.15  # lens shift: subject sits right of centre, the left third is for the titles
 SHOTS = [
-    # f0, f1, (eye0, look0), (eye1, look1), focus0, focus1, lens0, lens1, shift
-    (F(0), F(5) - 1, view((2.0, 5.5, 0.3), 13.0, -1.0, 0.8), view((2.0, 5.5, 0.2), 11.0, 0.6, 0.5), (1.0, 4.0, 0.0), (1.4, 4.5, 0.0), 34, 34, SH),
-    (F(5), F(13) - 1, view((X2 + 1.0, -0.5, -0.2), 9.4, -0.8, 0.8), view((X2 + 1.2, -0.6, -0.3), 7.8, 0.6, 0.4), (X2, 0, 0.2), (X2 + 2.4, -1.4, -0.9), 34, 34, SH),
-    (F(13), F(21) - 1, view((X3 + 1.0, 0.4, 0.2), 9.4, -0.6, 0.6), view((X3 + 2.4, 0.3, 0.2), 8.4, 0.8, 0.4), (X3 - 2.6, 1.2, 0.9), (X3 + 3.6, 0.4, 0.6), 34, 34, SH),
-    (F(21), F(30) - 1, view((X4 + 0.2, 0.8, 0.1), 10.5, -1.2, 1.0), view((X4 + 2.2, 0.6, 0.0), 7.2, 0.4, 0.6), (X4 + 0.0, 0.9, 0.0), (X4 + 3.0, 0.9, 0.0), 34, 34, SH),
-    (F(30), F(37) - 1, view((X5 + 1.4, -0.4, 0.4), 9.2, -0.8, 0.8), view((X5 + 1.6, -0.5, 0.2), 8.2, 0.6, 0.4), (X5 + 0.6, 0, 0.9), (X5 + 2.8, -1.2, -1.3), 34, 34, SH),
-    (F(37), F(42), view((X6, 1.0, 0.4), 6.0, 0.0, 0.2), view((X6 - 0.6, 2.0, 0.6), 14.0, -1.6, 1.0), (X6, 0.5, 0.3), (X6, 1.5, 0.3), 34, 34, -0.22),
+    # f0, f1, (eye0, look0), (eye1, look1), focus0, focus1, lens, shift_x, shift_y
+    (F(0), F(6) - 1, view((5.0, 0.0, 0.1), 11.5, -1.0, 0.9), view((5.0, 0.0, 0.1), 9.0, 0.6, 0.5), (4.8, 0.4, 0.3), (5.4, -0.2, 0), 34, SH, 0),
+    (F(6), F(12) - 1, view((X2 + 1.6, 0.4, 0.1), 10.0, -0.8, 0.8), view((X2 + 2.0, 0.2, 0.0), 8.4, 0.6, 0.4), (X2 + 2.2, -0.6, 0), (X2 + 2.4, -0.6, 0), 34, SH, 0),
+    (F(12), F(18) - 1, view((X3 + 2.0, 0.4, 0.1), 10.0, -0.6, 0.6), view((X3 + 2.6, 0.3, 0.1), 8.6, 0.8, 0.4), (X3 + 2.2, -0.6, 0.1), (X3 + 2.4, -0.6, 0.1), 34, SH, 0),
+    (F(18), F(24) - 1, view((X4 - 7.3, 0.6, 0.3), 7.0, -0.4, 0.4), view((X4 + 9.1, 0.6, 0.3), 7.0, 0.4, 0.4), (X4 - 7.3, 0.9, 0), (X4 + 9.1, 1.2, 0), 34, SH, 0),
+    (F(24), F(30) - 1, view((X5 + 2.0, -0.4, 0.1), 10.0, -0.8, 0.8), view((X5 + 2.0, -0.5, 0.0), 8.6, 0.6, 0.4), (X5 + 0.4, -0.2, 0.9), (X5 + 3.4, -1.0, -0.8), 34, SH, 0),
+    (F(30), F(36) - 1, view((X6 + 2.4, -0.4, 0.2), 10.6, -0.8, 0.8), view((X6 + 2.6, -0.5, 0.2), 9.6, 0.6, 0.4), (X6 + 2.4, 0, 1.7), (X6 + 3.8, -1.2, -1.5), 34, SH, 0),
+    (F(36), F(42), view((X7, 1.0, 0.4), 6.0, 0.0, 0.2), view((X7 - 0.6, 2.0, 0.6), 14.0, -1.6, 1.0), (X7, 0.5, 0.3), (X7, 1.5, 0.3), 34, -0.22, 0),
 ]
-for i, (f0, f1, (e0, l0), (e1, l1), fo0, fo1, n0, n1, sh) in enumerate(SHOTS):
-    for fr, e, l, fo, n in ((f0, e0, l0, fo0, n0), (f1, e1, l1, fo1, n1)):
+for i, (f0, f1, (e0, l0), (e1, l1), fo0, fo1, n, sh, shy) in enumerate(SHOTS):
+    for fr, e, l, fo in ((f0, e0, l0, fo0), (f1, e1, l1, fo1)):
         cam.location, target.location, focus.location = e, l, fo
-        cam.data.lens, cam.data.shift_x = n, sh
+        cam.data.lens, cam.data.shift_x, cam.data.shift_y = n, sh, shy
         cam.keyframe_insert("location", frame=fr)
         target.keyframe_insert("location", frame=fr)
         focus.keyframe_insert("location", frame=fr)
         cam.data.keyframe_insert("lens", frame=fr)
         cam.data.keyframe_insert("shift_x", frame=fr)
+        cam.data.keyframe_insert("shift_y", frame=fr)
 for ob in (cam, target, focus, cam.data):
     for fc in curves_of(ob):
         for i, k in enumerate(fc.keyframe_points):
-            k.interpolation = "BEZIER" if i % 2 == 0 else "CONSTANT"
+            # cuts between shots; the project shot (the 4th) trucks at an even pace so screens meet the step strip on time
+            k.interpolation = "CONSTANT" if i % 2 else ("LINEAR" if i == 6 else "BEZIER")
         fc.update()
 
 # ---------------------------------------------------------------- render
