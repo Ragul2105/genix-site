@@ -46,11 +46,29 @@ export default function Header() {
     };
   }, [open]);
 
-  const links = nav.map((n, i) => (
-    <Link key={n.href} href={n.href} aria-current={path === n.href ? "page" : undefined} style={{ "--i": i + 1 } as React.CSSProperties}>
-      {n.label}
-    </Link>
-  ));
+  const isOn = (href: string) => {
+    const base = href.split("#")[0];
+    return base !== "/" && path.startsWith(base);
+  };
+  const links = nav.map((n, i) => {
+    const style = { "--i": i + 1 } as React.CSSProperties;
+    if (!n.children) {
+      return (
+        <Link key={n.label} href={n.href} aria-current={path === n.href ? "page" : undefined} style={style}>{n.label}</Link>
+      );
+    }
+    return (
+      <div key={n.label} className="dd" style={style}>
+        <Link href={n.href} className="dd-top" aria-current={isOn(n.href) ? "page" : undefined}>
+          {n.label}
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+        </Link>
+        <div className="dd-menu">
+          {n.children.map((c) => <Link key={c.label} href={c.href}>{c.label}</Link>)}
+        </div>
+      </div>
+    );
+  });
 
   return (
     <header className={`site-header${open ? " is-open" : ""}`}>
@@ -61,7 +79,10 @@ export default function Header() {
         </Link>
         <nav className="nav" aria-label="Main">{links}</nav>
         <div className="hdr-actions">
-          <Link className="btn y sm" href="/enrol" style={{ "--i": nav.length + 1 } as React.CSSProperties}>Enrol Now</Link>
+          <Link className="btn bl sm hdr-cta" href="/enrol?interest=trial" style={{ "--i": nav.length + 1 } as React.CSSProperties}>
+            <span><span className="hide-sm">Book a </span>Free Trial</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+          </Link>
           <button
             ref={toggle}
             type="button"

@@ -1,75 +1,59 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import Icon from "@/components/Icon";
 
-/** Chapter starts in seconds, matching 3d/intro_titles.py. */
-const CHAPTERS = [
-  { t: 0, label: "Genix" },
-  { t: 5, label: "Foundation" },
-  { t: 13, label: "Advanced" },
-  { t: 21, label: "The project" },
-  { t: 30, label: "Services" },
-  { t: 37, label: "Quality" },
-];
-const LENGTH = 42;
+const PLAY_EVENT = "genix:play-intro";
+
+/** "Watch Company Introduction": asks the hero film to start (it lives in the same hero). */
+export function WatchIntroButton({ className }: { className?: string }) {
+  return (
+    <button type="button" className={className} onClick={() => window.dispatchEvent(new Event(PLAY_EVENT))}>
+      <span className="wi-ic" aria-hidden="true"><Icon name="play" size={14} /></span>
+      Watch Company Introduction
+    </button>
+  );
+}
 
 /**
- * The hero film: muted autoplay only while on screen (never for reduced-motion or data-saver visitors),
- * a pause control, and a chapter rail that shows progress and jumps to a chapter on click.
+ * The company introduction as a card (as in the client's reference): poster, play button, title and
+ * running time. Once started it plays inline with a thin progress line; click toggles pause.
  */
 export default function IntroFilm() {
   const video = useRef<HTMLVideoElement>(null);
-  const rail = useRef<HTMLOListElement>(null);
+  const bar = useRef<HTMLSpanElement>(null);
+  const [started, setStarted] = useState(false);
   const [playing, setPlaying] = useState(false);
-  const [chapter, setChapter] = useState(0);
-  const userPaused = useRef(false);
 
   useEffect(() => {
     const v = video.current!;
-    const quiet = matchMedia("(prefers-reduced-motion: reduce)").matches ||
-      (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
     let raf = 0;
-
-    const paint = () => {
-      const t = v.currentTime;
-      const items = rail.current?.children;
-      if (items) {
-        CHAPTERS.forEach((c, i) => {
-          const end = CHAPTERS[i + 1]?.t ?? LENGTH;
-          const f = Math.min(1, Math.max(0, (t - c.t) / (end - c.t)));
-          (items[i] as HTMLElement).style.setProperty("--p", String(f));
-        });
-      }
-      let idx = 0;
-      CHAPTERS.forEach((c, i) => { if (t >= c.t) idx = i; });
-      setChapter(idx);
-      if (!v.paused) raf = requestAnimationFrame(paint);
+    const tick = () => {
+      if (bar.current && v.duration) bar.current.style.transform = `scaleX(${v.currentTime / v.duration})`;
+      if (!v.paused) raf = requestAnimationFrame(tick);
     };
-    const onPlay = () => { setPlaying(true); cancelAnimationFrame(raf); raf = requestAnimationFrame(paint); };
-    const onPause = () => { setPlaying(false); paint(); };
+    const onPlay = () => { setStarted(true); setPlaying(true); raf = requestAnimationFrame(tick); };
+    const onPause = () => { setPlaying(false); cancelAnimationFrame(raf); tick(); };
+    const fromButton = () => {
+      v.closest(".film")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      v.play().catch(() => {});
+    };
     v.addEventListener("play", onPlay);
     v.addEventListener("pause", onPause);
-    v.addEventListener("seeked", paint);
-
-    const io = new IntersectionObserver(([e]) => {
-      if (quiet || userPaused.current) return;
-      if (e.isIntersecting) v.play().catch(() => {});
-      else v.pause();
-    }, { threshold: 0.35 });
-    io.observe(v);
-    return () => { io.disconnect(); cancelAnimationFrame(raf); v.removeEventListener("play", onPlay); v.removeEventListener("pause", onPause); v.removeEventListener("seeked", paint); };
+    v.addEventListener("ended", onPause);
+    window.addEventListener(PLAY_EVENT, fromButton);
+    return () => {
+      cancelAnimationFrame(raf);
+      v.removeEventListener("play", onPlay);
+      v.removeEventListener("pause", onPause);
+      v.removeEventListener("ended", onPause);
+      window.removeEventListener(PLAY_EVENT, fromButton);
+    };
   }, []);
 
   const toggle = () => {
     const v = video.current!;
-    userPaused.current = !v.paused;
     if (v.paused) v.play().catch(() => {});
     else v.pause();
-  };
-  const jump = (t: number) => {
-    const v = video.current!;
-    userPaused.current = false;
-    v.currentTime = t + 0.01;
-    v.play().catch(() => {});
   };
   const full = () => {
     const v = video.current! as HTMLVideoElement & { webkitEnterFullscreen?: () => void };
@@ -78,45 +62,35 @@ export default function IntroFilm() {
   };
 
   return (
-    <figure className="film">
+    <figure className={`film${started ? " is-started" : ""}${playing ? " is-playing" : ""}`}>
       <div className="film-frame">
         <video
           ref={video}
           muted
           playsInline
-          loop
           preload="metadata"
           poster="/video/genix-intro-poster.jpg"
           onClick={toggle}
-          aria-label="Genix Solutions introduction: screens of an e-commerce app travel along a quality line through manual testing, automation and an end-to-end check, then the line forms the Genix logo."
+          aria-label="Genix Solutions company introduction, 42 seconds, no narration."
         >
           <source src="/video/genix-intro.mp4" type="video/mp4" />
         </video>
-        <div className="film-ui">
-          <button type="button" className="film-btn" onClick={toggle} aria-label={playing ? "Pause the film" : "Play the film"}>
-            {playing ? (
-              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor" /></svg>
-            ) : (
-              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12.5-7.5z" fill="currentColor" /></svg>
-            )}
-          </button>
-          <span className="film-now">{CHAPTERS[chapter].label}</span>
-          <button type="button" className="film-btn" onClick={full} aria-label="Watch full screen">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" /></svg>
-          </button>
-        </div>
+        <button type="button" className="film-play" onClick={toggle} aria-label={playing ? "Pause the introduction" : "Play the introduction"}>
+          {playing ? (
+            <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor" /></svg>
+          ) : (
+            <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor" /></svg>
+          )}
+        </button>
+        <figcaption className="film-cap">
+          <span className="film-title">Genix Solutions<br />Company Introduction</span>
+          <span className="film-meta">
+            <span>0:42</span>
+            <button type="button" onClick={full} aria-label="Watch full screen"><Icon name="expand" size={18} /></button>
+          </span>
+        </figcaption>
+        <span className="film-progress" aria-hidden="true"><span ref={bar} /></span>
       </div>
-      <figcaption className="sr">A 42-second introduction to Genix Solutions’ QA training and testing services.</figcaption>
-      <ol className="film-rail" ref={rail} aria-label="Film chapters">
-        {CHAPTERS.map((c, i) => (
-          <li key={c.label} style={{ flexGrow: (CHAPTERS[i + 1]?.t ?? LENGTH) - c.t }} className={i === chapter ? "is-on" : undefined}>
-            <button type="button" onClick={() => jump(c.t)}>
-              <span className="film-bar" aria-hidden="true"><i /></span>
-              <span className="film-label">{c.label}</span>
-            </button>
-          </li>
-        ))}
-      </ol>
     </figure>
   );
 }

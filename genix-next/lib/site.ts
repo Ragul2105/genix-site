@@ -1,10 +1,74 @@
-export const nav = [
+export type NavItem = { href: string; label: string; children?: { href: string; label: string }[] };
+
+/** Main navigation, grouped as in the client's reference. Every link points at a page or section that exists. */
+export const nav: NavItem[] = [
   { href: "/", label: "Home" },
-  { href: "/about", label: "About Us" },
-  { href: "/programme", label: "QA Programme" },
+  {
+    href: "/programme", label: "QA Training", children: [
+      { href: "/#foundation", label: "Foundation Programme" },
+      { href: "/#advanced", label: "Advanced Programme" },
+      { href: "/#pathway", label: "Complete QA Pathway" },
+      { href: "/programme#curriculum", label: "Course Syllabus" },
+      { href: "/enrol?interest=trial", label: "Free Trial Session" },
+      { href: "/enrol", label: "Enrol Now" },
+    ],
+  },
+  {
+    href: "/#services", label: "Testing Services", children: [
+      { href: "/#svc-manual", label: "Manual Testing" },
+      { href: "/#svc-automation", label: "Test Automation" },
+      { href: "/#svc-support", label: "End-to-End QA Support" },
+      { href: "/contact#business", label: "Request a Consultation" },
+    ],
+  },
   { href: "/approach", label: "Our Approach" },
-  { href: "/careers", label: "Careers & Certification" },
-  { href: "/contact", label: "Contact Us" },
+  {
+    href: "/careers", label: "Resources", children: [
+      { href: "/careers", label: "Careers & Certification" },
+      { href: "/careers#interview", label: "Interview Preparation" },
+      { href: "/contact#faq", label: "FAQs" },
+    ],
+  },
+  { href: "/about", label: "About Us" },
+  { href: "/contact", label: "Contact" },
+];
+
+/** Footer columns (reference layout). */
+export const footerCols = [
+  {
+    title: "QA Training", links: [
+      { href: "/#foundation", label: "Foundation Programme" },
+      { href: "/#advanced", label: "Advanced Programme" },
+      { href: "/#pathway", label: "Complete QA Pathway" },
+      { href: "/programme#curriculum", label: "Course Syllabus" },
+      { href: "/enrol?interest=trial", label: "Free Trial Session" },
+      { href: "/enrol", label: "Enrol Now" },
+    ],
+  },
+  {
+    title: "Testing Services", links: [
+      { href: "/#svc-manual", label: "Manual Testing" },
+      { href: "/#svc-automation", label: "Test Automation" },
+      { href: "/#svc-manual", label: "API Testing" },
+      { href: "/#svc-manual", label: "Database Testing" },
+      { href: "/#svc-support", label: "End-to-End QA" },
+      { href: "/contact#business", label: "Request a Quote" },
+    ],
+  },
+  {
+    title: "Resources", links: [
+      { href: "/careers", label: "Careers & Certification" },
+      { href: "/careers#interview", label: "Interview Preparation" },
+      { href: "/contact#faq", label: "FAQs" },
+    ],
+  },
+  {
+    title: "About Us", links: [
+      { href: "/about", label: "About Genix" },
+      { href: "/approach", label: "Our Approach" },
+      { href: "/contact", label: "Contact" },
+    ],
+  },
 ];
 
 export const legalLinks = [

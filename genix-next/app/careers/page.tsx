@@ -32,7 +32,7 @@ export default function Careers() {
       </PageHero>
 
       {/* interview kit: what an interview round feels like, then everything that prepares you for it */}
-      <section className="sec">
+      <section className="sec" id="interview">
         <div className="w cr-kit">
           <div>
             <div className="eb">Interview &amp; profile</div>

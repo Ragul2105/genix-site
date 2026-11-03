@@ -82,7 +82,7 @@ export default function Contact() {
       </section>
 
       {/* FAQ */}
-      <section className="sec">
+      <section className="sec" id="faq">
         <div className="w ct-faq">
           <div>
             <div className="eb">Questions</div>

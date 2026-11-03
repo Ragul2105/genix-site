@@ -19,7 +19,9 @@ def font(w, size):
         _cache[k] = ImageFont.truetype(FONT[w], size * SS)
     return _cache[k]
 
-NAVY, BLUE, SKY, YELLOW, GREEN, RED, INK = "#0B1F3A", "#2563EB", "#6EA8FF", "#FFC83D", "#2DB86A", "#F0524F", "#4A5B75"
+# dark theme: titles sit on the navy film
+NAVY, BLUE, SKY, YELLOW, GREEN, RED, INK = "#0B1F3A", "#2563EB", "#6EA8FF", "#FFC83D", "#3DD47A", "#FF6B6B", "#B9C9E2"
+HEAD, ACC = "#FFFFFF", "#7FB0FF"
 def rgb(h, a=255):
     h = h.lstrip("#")
     return (int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16), a)
@@ -69,7 +71,7 @@ def tracked(d, xy, s, w, size, fill, alpha, track):
 def width(s, w, size):
     return font(w, size).getlength(s) / SS
 
-def pill(d, x, y, label, alpha, fill="#FFFFFF", fg=NAVY, border="#C9D7EC", size=24, padx=22, h=52):
+def pill(d, x, y, label, alpha, fill="#12294A", fg="#EAF1FB", border="#2D5285", size=24, padx=22, h=52):
     tw = width(label, 700, size)
     if alpha > 0:
         d.rounded_rectangle((S(x), S(y), S(x + tw + 2 * padx), S(y + h)), radius=S(h / 2),
@@ -99,8 +101,8 @@ def logo(d, x, y, size, alpha):
 
 def lockup(d, x, y, size, alpha):
     logo(d, x, y, size, alpha)
-    text(d, (x + size * 1.08, y + size * 0.05), "Genix", 800, int(size * 0.5), NAVY, alpha)
-    tracked(d, (x + size * 1.1, y + size * 0.62), "SOLUTIONS", 700, int(size * 0.17), BLUE, alpha, size * 0.05)
+    text(d, (x + size * 1.08, y + size * 0.05), "Genix", 800, int(size * 0.5), HEAD, alpha)
+    tracked(d, (x + size * 1.1, y + size * 0.62), "SOLUTIONS", 700, int(size * 0.17), ACC, alpha, size * 0.05)
 
 # ------------------------------------------------------------------ the wash: full strength behind the type, easing to nothing by ~60% width
 _wash = None
@@ -114,7 +116,7 @@ def wash_layer(strength):
         _wash = (np.tile(f, (S(H), 1)) * 0.82).astype("float32")
     import numpy as np
     a = Image.fromarray((_wash * strength * 255).astype("uint8"))
-    layer = Image.new("RGBA", (S(W), S(H)), rgb("#F2F6FC"))
+    layer = Image.new("RGBA", (S(W), S(H)), rgb("#061224"))
     layer.putalpha(a)
     return layer
 
@@ -154,9 +156,9 @@ def draw_titles(t):
         a, dy = a_y(nxt(0.12))
         lockup(d, X0, 330 + dy, 120, a)
         a, dy = a_y(nxt(0.12))
-        text(d, (X0, 510 + dy), "Build QA skills.", 800, 66, NAVY, a)
+        text(d, (X0, 510 + dy), "Build QA skills.", 800, 66, HEAD, a)
         a, dy = a_y(nxt(0.12))
-        text(d, (X0, 592 + dy), "Deliver better software.", 800, 66, BLUE, a)
+        text(d, (X0, 592 + dy), "Deliver better software.", 800, 66, ACC, a)
         a, dy = a_y(nxt(0.12))
         text(d, (X0, 720 + dy), "QA training  ·  Offshore software testing", 600 if False else 500, 30, INK, a)
         return img
@@ -169,12 +171,12 @@ def draw_titles(t):
     if ch.get("chip"):
         a, dy = a_y(nxt())
         n, label = ch["chip"]
-        wpx = pill(d, X0, y + dy, f"{n}", a, fill=NAVY, fg="#FFFFFF", border=None, size=22, padx=18, h=46)
-        text(d, (X0 + wpx + 16, y + 9 + dy), label.upper(), 700, 22, BLUE, a)
+        wpx = pill(d, X0, y + dy, f"{n}", a, fill=YELLOW, fg=NAVY, border=None, size=22, padx=18, h=46)
+        text(d, (X0 + wpx + 16, y + 9 + dy), label.upper(), 700, 22, YELLOW, a)
         y += 78
     for i, line in enumerate(ch["title"]):
         a, dy = a_y(nxt(), 34)
-        text(d, (X0, y + dy), line, 800, 70, NAVY if i == 0 else BLUE, a)
+        text(d, (X0, y + dy), line, 800, 70, HEAD if i == 0 else ACC, a)
         y += 86
     y += 26
     if ch.get("pills"):
@@ -191,32 +193,14 @@ def draw_titles(t):
         a, dy = a_y(nxt())
         text(d, (X0, y + dy), ch["meta"], 500, 28, INK, a)
     if ch.get("journey"):
-        steps = ["Search", "Product", "Cart", "Payment", "Order"]
-        x = X0
-        for i, s in enumerate(steps):
-            a, dy = a_y(nxt(0.09), 18)
-            fill, fg, border = "#FFFFFF", NAVY, "#C9D7EC"
-            if s == "Payment":
-                red = expo_out((t - (T_STOP - 0.6)) / 0.4) * (1 - expo_out((t - (T_GO - 0.9)) / 0.4))
-                green = expo_out((t - (T_GO - 0.9)) / 0.4)
-                if red > 0.5:
-                    fill, fg, border = RED, "#FFFFFF", None
-                elif green > 0.5:
-                    fill, fg, border = GREEN, "#FFFFFF", None
-            wpx = pill(d, x, y + dy, s, a, fill=fill, fg=fg, border=border)
-            x += wpx
-            if i < len(steps) - 1 and a > 0:
-                d.line([(S(x + 6), S(y + 26 + dy)), (S(x + 22), S(y + 26 + dy))], fill=rgb(SKY, int(255 * a)), width=S(3))
-                x += 28
-        y += 84
         # what happens on the line, in one caption that changes with the story
         cap_a, dy = a_y(nxt(), 12)
         if t < T_STOP - 0.6:
-            cap, col = "Every screen goes through the same customer journey.", INK
+            cap, col = "Search, product, cart, payment, order: one journey, every module.", INK
         elif t < T_GO - 0.9:
-            cap, col = "Line stopped: payment retry charges the customer twice.", RED
+            cap, col = "Defect found: a payment retry charges the customer twice.", RED
         else:
-            cap, col = "Fixed, retested, back on the line.", GREEN
+            cap, col = "Fixed, retested, and released.", GREEN
         text(d, (X0, y + dy), cap, 700, 28, col, cap_a)
     return img
 
