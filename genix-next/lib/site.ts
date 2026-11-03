@@ -13,14 +13,6 @@ export const nav: NavItem[] = [
       { href: "/enrol", label: "Enrol Now" },
     ],
   },
-  {
-    href: "/#services", label: "Testing Services", children: [
-      { href: "/#svc-manual", label: "Manual Testing" },
-      { href: "/#svc-automation", label: "Test Automation" },
-      { href: "/#svc-support", label: "End-to-End QA Support" },
-      { href: "/contact#business", label: "Request a Consultation" },
-    ],
-  },
   { href: "/approach", label: "Our Approach" },
   {
     href: "/careers", label: "Resources", children: [
