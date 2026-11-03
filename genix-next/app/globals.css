@@ -685,7 +685,7 @@ a.ct-intent:hover{transform:translateY(-3px);border-color:#BFD3FF;box-shadow:0 1
 /* hero (dark) */
 .h2o{position:relative;background:radial-gradient(1200px 500px at 85% 10%,rgba(37,99,235,.35),transparent 60%),linear-gradient(180deg,#0B1F3A 0%,#0E2748 100%);color:#fff;padding:64px 0 120px;overflow:hidden}
 .h2o::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:56px 56px;mask-image:linear-gradient(180deg,#000,transparent 85%)}
-.h2o-grid{position:relative;display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);gap:48px;align-items:center}
+.h2o-grid{position:relative;display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);gap:40px;align-items:center}
 .h2o .eb{color:#fff;letter-spacing:.14em}
 .h2o .eb i{font-style:normal;color:var(--sky);margin:0 6px}
 .h2o h1{font-size:clamp(40px,4.4vw,62px);line-height:1.04;letter-spacing:-.03em;margin:18px 0 20px;color:#fff}
@@ -698,7 +698,8 @@ a.ct-intent:hover{transform:translateY(-3px);border-color:#BFD3FF;box-shadow:0 1
 .h2o-proof{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
 .h2o-proof li{display:flex;align-items:center;gap:10px;font-size:13.5px;font-weight:600;color:#E4ECF8;line-height:1.3}
 .h2o-proof svg{flex:none;color:#fff}
-.h2o-media{position:relative}
+/* the film runs into the page margin on wide screens (up to 120px), keeping a 32px gutter to the edge */
+.h2o-media{position:relative;margin-right:calc(-1 * clamp(0px, (100vw - 1232px) / 2, 120px))}
 
 /* the company film card */
 .film{margin:0}
@@ -854,6 +855,7 @@ footer .credit a{text-decoration:underline}
 @media (max-width:900px){
   .h2o{padding:40px 0 100px}
   .h2o-grid{grid-template-columns:1fr;gap:36px}
+  .h2o-media{margin-right:0}
   .h2o-proof{grid-template-columns:repeat(2,1fr)}
   .trial2-grid{grid-template-columns:1fr;gap:0}
   .trial2-photo{height:200px}
