@@ -17,6 +17,7 @@ export async function POST(request: Request) {
   const enquiry = {
     source: clean(body.source) === "enrol" ? "enrol" : "contact",
     type: clean(body.type),
+    interest: clean(body.interest),
     name: clean(body.name),
     email: clean(body.email),
     phone: clean(body.phone),

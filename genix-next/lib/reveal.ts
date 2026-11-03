@@ -10,7 +10,7 @@ export const STAGGER_MS = 80;
 export const MAX_STAGGER_STEPS = 9;
 
 // Containers that reveal as one unit; their children must not animate separately.
-const units = ".card, .fcard, .lc-card, .journey, .ticket, form, table, .acc";
+const units = ".card, .fcard, .lc-card, .journey, .ticket, form, table, .acc, .film, .pp-opt, .pp-panel, .pj-thread > li, .sv > *, .why-list > li, .trial-card";
 const notInUnit = `:not(:is(${units}) *)`;
 
 /** Plain blocks: fade + rise. */
@@ -19,6 +19,8 @@ const blocks = [
   "main .ticket", "main .card", "main .fcard", "main .lc-card", "main .journey", "main .sec-link", "main .step", "main .flow", "main .layers",
   "main table", "main .acc", "main .stats > div", "main form", "main .w > p",
   "main .cta .btn", "main .cta .kick", "footer .cols > *", "footer .copy",
+  "main .hx-biz", "main .film", "main .pp-opt", "main .pp-same", "main .pp-panel", "main .pj-thread > li", "main .sv > *",
+  "main .why-list > li", "main .trial .kick", "main .trial p", "main .trial-card",
 ].map((s) => s + notInUnit);
 
 /** Headings: same, plus a short blur (Orizon). */

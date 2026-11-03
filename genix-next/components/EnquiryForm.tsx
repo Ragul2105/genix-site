@@ -9,6 +9,7 @@ export default function EnquiryForm({ variant }: { variant: Variant }) {
   const [state, setState] = useState<State>({ status: "idle" });
   const enrol = variant === "enrol";
   const typeRef = useRef<HTMLSelectElement>(null);
+  const interestRef = useRef<HTMLSelectElement>(null);
 
   // links to #business (home page, contact tiles, FAQ) pre-select a business enquiry
   useEffect(() => {
@@ -16,6 +17,10 @@ export default function EnquiryForm({ variant }: { variant: Variant }) {
       if (typeRef.current && window.location.hash === "#business") typeRef.current.value = "business";
     };
     pick();
+    // "Book a free trial" and the programme buttons arrive as /enrol?interest=<id>
+    const wanted = new URLSearchParams(window.location.search).get("interest");
+    const sel = interestRef.current;
+    if (sel && wanted && Array.from(sel.options).some((o) => o.value === wanted)) sel.value = wanted;
     window.addEventListener("hashchange", pick);
     return () => window.removeEventListener("hashchange", pick);
   }, []);
@@ -66,6 +71,14 @@ export default function EnquiryForm({ variant }: { variant: Variant }) {
       <input id="phone" name="phone" type="tel" required={enrol} autoComplete="tel" />
       {enrol && (
         <>
+          <label htmlFor="interest">I am interested in</label>
+          <select id="interest" name="interest" defaultValue="unsure" ref={interestRef}>
+            <option value="trial">A free trial session</option>
+            <option value="foundation">QA Foundation Programme (Level 1)</option>
+            <option value="advanced">QA Advanced Programme (Level 2)</option>
+            <option value="pathway">Complete QA Learning Pathway (Level 1 + 2)</option>
+            <option value="unsure">Not sure yet</option>
+          </select>
           <label htmlFor="loc">Current location / country</label>
           <input id="loc" name="loc" type="text" />
           <label htmlFor="edu">Education / qualification</label>
