@@ -1,0 +1,288 @@
+<!doctype html>
+<!--
+  The company introduction film (42 s, 1920×1080): the client's own seven-slide video, rebuilt so every
+  row, card and column lines up. Copy, colours and the 6-second chapters follow the client's file.
+  render.cjs steps window.render(t) frame by frame and pipes the screenshots into ffmpeg.
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+@font-face{font-family:J;src:url(../fonts/jakarta-500.ttf);font-weight:500}
+@font-face{font-family:J;src:url(../fonts/jakarta-700.ttf);font-weight:700}
+@font-face{font-family:J;src:url(../fonts/jakarta-800.ttf);font-weight:800}
+:root{
+  --navy:#0A1A3C; --ink:#FFFFFF; --muted:#A8BBD8; --cyan:#86DCE4; --sky:#8DB8FF;
+  --teal:#13A08F; --blue:#2F6FE6; --card:rgba(32,72,135,.42); --line:rgba(120,165,225,.32);
+  --pill:rgba(25,125,140,.38); --pillfg:#86E6E2;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1920px;height:1080px;overflow:hidden;background:var(--navy)}
+body{font-family:J,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+#bg{position:absolute;inset:0;background:
+  radial-gradient(900px 700px at var(--gx,82%) var(--gy,18%),rgba(24,120,130,.28),transparent 70%),
+  radial-gradient(1000px 800px at 4% 104%,rgba(38,92,200,.30),transparent 70%),
+  linear-gradient(160deg,#0A1736 0%,#0B1F48 55%,#0A2350 100%)}
+.slide{position:absolute;inset:0;opacity:0}
+.a{will-change:transform,opacity}
+
+/* header: the logo card's left edge is the content edge */
+.logo{position:absolute;left:112px;top:60px;display:flex;align-items:center;gap:14px;background:#fff;border-radius:18px;padding:18px 30px 18px 22px;box-shadow:0 18px 40px -18px rgba(0,0,0,.6)}
+.logo b{display:block;font-weight:800;font-size:34px;line-height:1;color:#0B1F3A;letter-spacing:-.01em}
+.logo i{display:block;font-style:normal;font-weight:700;font-size:12.5px;letter-spacing:.32em;color:#2563EB;margin-top:6px}
+
+.body{position:absolute;left:112px;right:112px;top:212px;bottom:96px;display:flex;align-items:center;gap:72px}
+.col{flex:1 1 0;min-width:0}
+.right{flex:0 0 640px}
+.stack{flex-direction:column;align-items:stretch;justify-content:center;gap:64px}
+
+.pill{display:inline-block;background:var(--pill);color:var(--pillfg);border:1px solid rgba(110,220,220,.18);border-radius:999px;padding:12px 26px;font-weight:800;font-size:20px;letter-spacing:.06em;text-transform:uppercase}
+h1{margin-top:36px;font-weight:800;font-size:80px;line-height:1.08;letter-spacing:-.02em}
+h1 span{display:block}
+h1 .c{color:var(--cyan)} h1 .s{color:var(--sky)}
+.sub{margin-top:30px;font-weight:500;font-size:29px;line-height:1.5;color:var(--muted);max-width:860px}
+
+/* cards */
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:22px;position:relative;overflow:hidden}
+.card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:8px;background:var(--bar,var(--teal))}
+
+/* 1 · introduction */
+.net{position:relative;width:640px;height:420px;margin:0 auto}
+.net > svg{position:absolute;inset:0;margin:auto}
+.node{position:absolute;width:118px;height:118px;margin:-59px 0 0 -59px;border-radius:50%;display:grid;place-items:center;box-shadow:0 18px 40px -16px rgba(0,0,0,.6)}
+.node.t{background:var(--teal)} .node.b{background:var(--blue)}
+.svc{display:flex;gap:22px;margin-top:28px}
+.svc .card{flex:1 1 0;padding:28px 22px 28px 36px}
+.svc h3{font-weight:800;font-size:33px;line-height:1.1}
+.svc p{margin-top:10px;font-weight:500;font-size:21px;white-space:nowrap;color:var(--muted)}
+
+/* 2/3 · programmes */
+.prog{padding:30px 36px 30px 44px}
+.prog h3{font-weight:800;font-size:38px;line-height:1.1}
+.prog p{margin-top:12px;font-weight:500;font-size:23px;color:var(--muted)}
+.mods{margin-top:26px;display:flex;flex-direction:column;gap:14px}
+.mod{display:flex;align-items:center;gap:22px;height:76px;padding:0 26px 0 16px;background:rgba(28,80,130,.42);border:1.5px solid var(--line);border-radius:16px}
+.mod em{flex:0 0 auto;display:grid;place-items:center;font-style:normal;font-weight:800;color:#fff}
+.mod em.n{width:46px;height:46px;border-radius:50%;background:var(--teal);font-size:18px}
+.mod em.k{width:104px;height:46px;border-radius:12px;background:var(--blue);font-size:17px;letter-spacing:.02em}
+.mod span{font-weight:700;font-size:29px}
+
+/* 4 · journey and 6 · QA support rows */
+.row{display:flex;align-items:stretch;justify-content:space-between}
+.step{flex:1 1 0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:0 12px;background:rgba(28,62,120,.5);border:1.5px solid var(--line);border-radius:18px;transition:none}
+.step small{font-weight:800;font-size:20px;color:var(--pillfg);letter-spacing:.04em}
+.step b{font-weight:700;font-size:26px;line-height:1.2}
+.arrow{flex:0 0 44px;display:grid;place-items:center;color:#7FA6D6}
+.journey .step{height:128px}
+.support .step{height:156px}
+.support .step b{font-size:27px}
+.tag{margin-top:44px;text-align:center;font-weight:800;font-size:23px;letter-spacing:.14em;color:#A9C6EA}
+.tag i{font-style:normal;margin:0 22px;color:var(--teal)}
+
+/* 5 · services */
+.two{display:flex;gap:40px}
+.two .card{flex:1 1 0;padding:36px 40px 38px 48px}
+.two .hd{display:flex;align-items:center;gap:20px}
+.two .ic{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:28px;background:rgba(25,125,140,.55)}
+.two h3{font-weight:800;font-size:36px}
+.two ul{list-style:none;margin-top:26px;display:flex;flex-wrap:wrap;gap:12px}
+.two li{font-weight:500;font-size:22px;color:#D3E0F2;background:rgba(255,255,255,.06);border:1px solid rgba(140,180,230,.22);border-radius:999px;padding:9px 18px}
+
+/* 7 · closing: everything on one centre line */
+.end{position:absolute;left:112px;right:112px;top:212px;bottom:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.end h1{margin-top:40px;font-size:84px}
+.end h2{margin-top:14px;font-weight:800;font-size:54px;color:var(--cyan);letter-spacing:-.01em}
+.btns{margin-top:56px;display:flex;gap:24px}
+.btn{font-weight:800;font-size:30px;border-radius:18px;padding:26px 46px;border:2px solid transparent}
+.btn.p{background:var(--teal);color:#fff;box-shadow:0 20px 40px -18px rgba(19,160,143,.8)}
+.btn.o{border-color:rgba(134,220,228,.6);color:#fff;background:rgba(255,255,255,.04)}
+.url{margin-top:52px;font-weight:500;font-size:26px;color:#C9D7EA}
+.end .tag{margin-top:22px}
+</style>
+</head>
+<body>
+<div id="bg"></div>
+
+<template id="logo">
+  <div class="logo">
+    <svg width="58" height="58" viewBox="0 0 80 80"><path d="M59.8 20.2 A28 28 0 1 0 68 40 H50" fill="none" stroke="#2563EB" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M25 39 L34 48 L50 27" fill="none" stroke="#FFC83D" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div><b>Genix</b><i>SOLUTIONS</i></div>
+  </div>
+</template>
+
+<!-- 1 · introduction -->
+<section class="slide">
+  <div class="body">
+    <div class="col">
+      <span class="pill a" data-in=".15">Company introduction</span>
+      <h1><span class="a" data-in=".3">Practical QA skills.</span><span class="c a" data-in=".45">Reliable software quality.</span></h1>
+      <p class="sub a" data-in=".6">Two connected services: industry-ready QA training and offshore software testing.</p>
+    </div>
+    <div class="right">
+      <div class="net">
+        <svg viewBox="30 0 640 420" class="a" data-in=".5"><g stroke="#4D74AE" stroke-width="5" stroke-linecap="round" opacity=".85"><line x1="350" y1="210" x2="470" y2="80"/><line x1="350" y1="210" x2="230" y2="340"/><line x1="350" y1="210" x2="220" y2="130"/><line x1="350" y1="210" x2="480" y2="290"/></g><circle cx="350" cy="210" r="10" fill="#6E95CF"/></svg>
+        <div class="node b a" data-in=".6" style="left:440px;top:80px"><svg width="44" height="44" viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="node t a" data-in=".7" style="left:190px;top:130px"><svg width="44" height="44" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="node t a" data-in=".8" style="left:450px;top:290px"><svg width="44" height="44" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="node b a" data-in=".9" style="left:200px;top:340px"><svg width="44" height="44" viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <div class="svc">
+        <div class="card a" data-in="1.05"><h3>QA Training</h3><p>Foundation + Advanced</p></div>
+        <div class="card a" data-in="1.2" style="--bar:var(--blue)"><h3>QA Services</h3><p>Manual + Automation</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 · foundation -->
+<section class="slide">
+  <div class="body">
+    <div class="col">
+      <span class="pill a" data-in=".15">01 / Foundation programme</span>
+      <h1><span class="a" data-in=".3">Start with the</span><span class="c a" data-in=".45">fundamentals.</span></h1>
+      <p class="sub a" data-in=".6">A beginner-friendly pathway for learners starting their journey in software testing.</p>
+    </div>
+    <div class="right">
+      <div class="card prog a" data-in=".5"><h3>3-month programme</h3><p>3 classes per week &nbsp;•&nbsp; 1 hour per class</p></div>
+      <div class="mods">
+        <div class="mod a" data-in=".75"><em class="n">01</em><span>SDLC &amp; Agile</span></div>
+        <div class="mod a" data-in=".9"><em class="n">02</em><span>Requirements</span></div>
+        <div class="mod a" data-in="1.05"><em class="n">03</em><span>Test cases</span></div>
+        <div class="mod a" data-in="1.2"><em class="n">04</em><span>Functional &amp; regression</span></div>
+        <div class="mod a" data-in="1.35"><em class="n">05</em><span>Defects &amp; QA practice</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 · advanced -->
+<section class="slide">
+  <div class="body">
+    <div class="col">
+      <span class="pill a" data-in=".15">02 / Advanced programme</span>
+      <h1><span class="a" data-in=".3">Build professional</span><span class="s a" data-in=".45">QA skills.</span></h1>
+      <p class="sub a" data-in=".6">For learners with manual testing knowledge who are ready to develop technical QA skills.</p>
+    </div>
+    <div class="right">
+      <div class="card prog a" data-in=".5" style="--bar:var(--blue)"><h3>3-month programme</h3><p>3 classes per week &nbsp;•&nbsp; 1 hour per class</p></div>
+      <div class="mods">
+        <div class="mod a" data-in=".75"><em class="k">Postman</em><span>API testing</span></div>
+        <div class="mod a" data-in=".9"><em class="k">SQL</em><span>SQL &amp; database validation</span></div>
+        <div class="mod a" data-in="1.05"><em class="k">AUTO</em><span>Test automation</span></div>
+        <div class="mod a" data-in="1.2"><em class="k">CI</em><span>Git &amp; CI/CD</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 · practical learning -->
+<section class="slide">
+  <div class="body stack">
+    <div>
+      <span class="pill a" data-in=".15">03 / Practical learning</span>
+      <h1><span class="a" data-in=".3">One continuous, realistic</span><span class="c a" data-in=".45">e-commerce project.</span></h1>
+      <p class="sub a" data-in=".6" style="max-width:1200px">Students follow a customer journey and practise testing as the application moves from product discovery to order completion.</p>
+    </div>
+    <div>
+      <div class="row journey" data-steps></div>
+      <p class="tag a" data-in="1.4">UNDERSTAND<i>•</i>PRACTISE<i>•</i>REVIEW<i>•</i>BUILD CONFIDENCE</p>
+    </div>
+  </div>
+</section>
+
+<!-- 5 · offshore testing services -->
+<section class="slide">
+  <div class="body stack">
+    <div>
+      <span class="pill a" data-in=".15">04 / Offshore testing services</span>
+      <h1><span class="a" data-in=".3">Manual testing.</span><span class="s a" data-in=".45">Automation testing.</span></h1>
+      <p class="sub a" data-in=".6" style="max-width:1200px">Flexible QA support for businesses across the software testing lifecycle.</p>
+    </div>
+    <div class="two">
+      <div class="card a" data-in=".8">
+        <div class="hd"><span class="ic">M</span><h3>Manual testing</h3></div>
+        <ul><li>Functional</li><li>Regression</li><li>API integration</li><li>Database validation</li></ul>
+      </div>
+      <div class="card a" data-in=".95" style="--bar:var(--blue)">
+        <div class="hd"><span class="ic" style="background:rgba(47,111,230,.6)">A</span><h3>Test automation</h3></div>
+        <ul><li>Automated functional tests</li><li>Regression suites</li><li>Execution reporting</li><li>Automation maintenance</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 · end-to-end QA support -->
+<section class="slide">
+  <div class="body stack">
+    <div>
+      <span class="pill a" data-in=".15">05 / End-to-end QA support</span>
+      <h1><span class="a" data-in=".3">From requirements</span><span class="c a" data-in=".45">to release confidence.</span></h1>
+      <p class="sub a" data-in=".6" style="max-width:1200px">We work alongside your team to provide practical QA support, clear communication and meaningful testing insights.</p>
+    </div>
+    <div class="row support" data-steps></div>
+  </div>
+</section>
+
+<!-- 7 · closing -->
+<section class="slide">
+  <div class="end">
+    <span class="pill a" data-in=".15">Genix Solutions</span>
+    <h1 class="a" data-in=".3">Build your QA skills.</h1>
+    <h2 class="a" data-in=".45">Strengthen your software quality.</h2>
+    <div class="btns">
+      <span class="btn p a" data-in=".7">Explore our programmes</span>
+      <span class="btn o a" data-in=".85">Discuss testing services</span>
+    </div>
+    <p class="url a" data-in="1.1">genix-site-yqtw.vercel.app</p>
+    <p class="tag a" data-in="1.25">LEARN<i>•</i>TEST<i>•</i>IMPROVE</p>
+  </div>
+</section>
+
+<script>
+const SLIDE = 6, FADE_OUT = 0.45, RISE = 26, DUR = 0.7;
+const ARROW = '<span class="arrow"><svg width="26" height="26" viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
+function fillRow(el, labels, t0, gap) {
+  el.innerHTML = labels.map((l, i) =>
+    (i ? ARROW.replace('class="arrow"', `class="arrow a" data-in="${(t0 + i * gap - gap / 2).toFixed(2)}"`) : "") +
+    `<div class="step a" data-in="${(t0 + i * gap).toFixed(2)}" data-lit="${(t0 + 0.5 + i * gap).toFixed(2)}"><small>${String(i + 1).padStart(2, "0")}</small><b>${l}</b></div>`).join("");
+}
+const rows = document.querySelectorAll("[data-steps]");
+fillRow(rows[0], ["Search", "Product", "Cart", "Login", "Address", "Delivery", "Payment", "Order"], 0.8, 0.14);
+fillRow(rows[1], ["Understand<br>requirements", "Plan &amp;<br>design tests", "Execute &amp;<br>automate", "Manage<br>defects", "Retest &amp;<br>report"], 0.8, 0.2);
+
+const slides = [...document.querySelectorAll(".slide")];
+const tpl = document.getElementById("logo");
+slides.forEach(s => s.prepend(tpl.content.cloneNode(true)));
+const items = slides.map(s => [...s.querySelectorAll(".a")].map(el => ({ el, d: +el.dataset.in || 0 })));
+const lits = slides.map(s => [...s.querySelectorAll("[data-lit]")].map(el => ({ el, d: +el.dataset.lit })));
+const ease = x => (x <= 0 ? 0 : x >= 1 ? 1 : 1 - Math.pow(1 - x, 3));
+
+window.render = function (t) {
+  document.getElementById("bg").style.setProperty("--gx", (82 - 6 * Math.sin(t / 7)) + "%");
+  document.getElementById("bg").style.setProperty("--gy", (18 + 6 * Math.cos(t / 9)) + "%");
+  const n = Math.min(slides.length - 1, Math.floor(t / SLIDE));
+  slides.forEach((s, i) => {
+    const lt = t - i * SLIDE;
+    const last = i === slides.length - 1;
+    const out = last ? 1 : 1 - ease((lt - (SLIDE - FADE_OUT)) / FADE_OUT);
+    s.style.opacity = i === n ? out : 0;
+    if (i !== n) return;
+    // the header holds still between slides; only the slide body animates
+    s.querySelector(".logo").style.opacity = i === 0 ? ease(lt / 0.6) : 1;
+    s.style.opacity = 1;
+    items[i].forEach(({ el, d }) => {
+      const p = ease((lt - d) / DUR);
+      el.style.opacity = p * out;
+      el.style.transform = `translateY(${(1 - p) * RISE - (1 - out) * 12}px)`;
+    });
+    lits[i].forEach(({ el, d }) => {
+      const p = ease((lt - d) / 0.4);
+      el.style.borderColor = `rgba(${Math.round(120 - 101 * p)},${Math.round(165 - 5 * p)},${Math.round(225 - 82 * p)},${(0.32 + 0.6 * p).toFixed(3)})`;
+      el.style.background = `rgba(${Math.round(28 - 8 * p)},${Math.round(62 + 30 * p)},${Math.round(120 - 10 * p)},${(0.5 + 0.1 * p).toFixed(3)})`;
+    });
+  });
+};
+window.render(3);
+</script>
+</body>
+</html>
