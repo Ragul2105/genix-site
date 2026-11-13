@@ -893,3 +893,80 @@ footer .credit a{text-decoration:underline}
   footer .cols{grid-template-columns:1fr 1fr}
   footer .brand{grid-column:1/-1}
 }
+
+/* ===================================================================== class schedule strip (home, under the programme cards) */
+.sched{margin-top:28px;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:28px;padding:22px 28px;border-radius:18px;background:linear-gradient(135deg,#EEF4FF,#F6F9FF);border:1px solid #DDE8FA}
+.sched h3{margin:0;font-size:20px;line-height:1.25;max-width:12ch;letter-spacing:-.01em}
+.sched ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.sched li{display:flex;align-items:center;gap:12px;padding:4px 18px;font-size:13.5px;color:var(--ink2);line-height:1.35}
+.sched li+li{border-left:1px solid #D5E1F5}
+.sched b{display:block;font-size:15px;color:var(--navy)}
+.sched-ic{flex:none;display:grid;place-items:center;width:44px;height:44px;border-radius:12px;background:#fff;color:var(--blue);box-shadow:0 8px 18px -12px rgba(37,99,235,.5)}
+
+/* ===================================================================== client experience (home, under the service cards) */
+.client{margin-top:28px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:36px;align-items:center;padding:24px 32px;border:1px solid #E1E9F4;border-radius:18px;background:#fff;box-shadow:0 18px 36px -30px rgba(11,31,58,.35)}
+.client-id{display:flex;align-items:center;gap:16px;padding-right:36px;border-right:1px solid var(--line)}
+.client-logo{flex:none;display:grid;place-items:center;width:72px;height:72px;border-radius:16px;background:#fff;border:1px solid var(--line)}
+.client-logo img{width:56px;height:56px}
+.client-eb{display:block;font-size:12px;letter-spacing:.14em;font-weight:800;color:var(--blue);text-transform:uppercase}
+.client-name{display:block;font-size:24px;color:var(--navy);letter-spacing:-.01em;margin-top:2px}
+.client-copy p{font-size:15.5px;max-width:780px}
+.client-copy b{color:var(--navy)}
+
+/* ===================================================================== course curriculum (programme page) */
+.cc{position:relative;padding-top:20px}
+.cc-anchor{position:absolute;top:0;left:0}
+.cc-tab,.cc-panel{--acc:#16A34A;--acc-dk:#15803D;--acc-tint:#E8F7EE}
+.cc-advanced{--acc:#2563EB;--acc-dk:#1D4ED8;--acc-tint:#E8F0FF}
+.cc-pathway{--acc:#F07B12;--acc-dk:#C2570C;--acc-tint:#FFF1E2}
+.cc-tabs{display:flex;flex-wrap:wrap;gap:10px;margin-top:36px}
+.cc-tab{font:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:14px 22px;border-radius:14px;border:1.5px solid var(--line);background:#fff;color:var(--navy);font-weight:800;font-size:16px;transition:background .3s,border-color .3s,color .3s}
+.cc-tab small{font-size:12.5px;font-weight:700;color:var(--ink2)}
+.cc-tab:hover{border-color:var(--acc)}
+.cc-tab[aria-selected=true]{background:var(--acc-dk);border-color:var(--acc-dk);color:#fff}
+.cc-tab[aria-selected=true] small{color:rgba(255,255,255,.88)}
+.cc-panel{display:grid;grid-template-columns:300px minmax(0,1fr);gap:40px;margin-top:16px;padding:32px;border:1px solid var(--line);border-radius:22px;background:#fff;box-shadow:0 24px 50px -36px rgba(11,31,58,.35)}
+.cc-side{align-self:start;background:var(--acc-tint);border-radius:16px;padding:26px}
+.cc-chip{display:inline-block;background:var(--acc-dk);color:#fff;font-size:12.5px;font-weight:800;padding:6px 12px;border-radius:8px}
+.cc-side h3{font-size:24px;line-height:1.2;margin:16px 0 8px;letter-spacing:-.015em}
+.cc-len{display:flex;gap:10px;align-items:center;color:var(--acc-dk);font-size:16px}
+.cc-len i{font-style:normal;opacity:.45}
+.cc-facts{list-style:none;padding:0;margin:20px 0 0;display:grid;gap:10px}
+.cc-facts li{display:flex;gap:10px;align-items:center;font-size:14.5px;font-weight:600;color:var(--navy)}
+.cc-facts svg{flex:none;color:var(--acc-dk)}
+.cc-enrol{margin-top:24px;display:inline-flex;align-items:center;gap:8px;background:var(--acc-dk);color:#fff;text-decoration:none;font-weight:800;font-size:14.5px;padding:12px 18px;border-radius:10px;transition:transform .5s cubic-bezier(.19,1,.22,1)}
+.cc-enrol:hover{transform:translateY(-2px)}
+.cc-topics{list-style:none;padding:0;margin:0;columns:2;column-gap:40px}
+.cc-topics li{display:flex;gap:14px;align-items:baseline;break-inside:avoid;padding:13px 0;border-bottom:1px solid #EEF2F8;font-size:15.5px;line-height:1.45;font-weight:600;color:var(--navy)}
+.cc-topics b{flex:none;width:22px;font-size:13px;font-weight:800;color:var(--acc-dk);font-variant-numeric:tabular-nums}
+.cc-intro{font-size:16.5px;line-height:1.65;color:var(--navy);padding-left:18px;border-left:3px solid var(--acc);margin-bottom:26px}
+.cc-split{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:36px}
+.cc-split h4{margin:0 0 4px;display:flex;flex-direction:column;gap:3px;font-size:17px;color:var(--navy)}
+.cc-split h4 span{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc-dk)}
+.cc-split .cc-topics{columns:1}
+.cc-split .cc-topics li{font-size:14.5px;padding:10px 0}
+.po-grid dd.is-set{color:var(--navy)}
+
+@media (max-width:1100px){
+  .sched{grid-template-columns:1fr;gap:16px}
+  .sched h3{max-width:none}
+  .sched ul{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:14px}
+  .sched li{padding:4px 12px 4px 0}
+  .sched li+li{border-left:0}
+  .cc-panel{grid-template-columns:1fr;gap:28px}
+}
+@media (max-width:760px){
+  .client{grid-template-columns:1fr;gap:18px;padding:22px}
+  .client-id{border-right:0;padding-right:0}
+  .cc-panel{padding:20px}
+  .cc-topics{columns:1}
+  .cc-split{grid-template-columns:1fr;gap:28px}
+  .cc-tab{flex:1 1 140px;padding:12px 16px}
+}
+@media (max-width:480px){
+  .sched ul{grid-template-columns:1fr}
+}
+
+/* roadmap labels: DOM buttons over the canvas, positioned each frame by PlaqueTracker */
+.rm-plaques{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.rm-plaque-pos{position:absolute;top:0;left:0;will-change:transform}

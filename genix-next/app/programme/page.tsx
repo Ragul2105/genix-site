@@ -9,6 +9,7 @@ import AppStack from "@/components/AppStack";
 import { curriculum } from "@/lib/curriculum";
 import { crossCutting, stackLayers } from "@/lib/project";
 import CtaBand from "@/components/CtaBand";
+import CourseCurriculum from "@/components/CourseCurriculum";
 import { journey, logistics } from "@/lib/site";
 
 export const metadata: Metadata = { title: "QA Programme" };
@@ -42,6 +43,7 @@ export default function Programme() {
           </div>
         </div>
       </section>
+      <CourseCurriculum />
       <Roadmap />
       <section className="sec ps" id="project">
         <div className="w">
@@ -117,11 +119,11 @@ export default function Programme() {
             <Link className="btn y" href="/enrol" style={{ marginTop: 28 }}>Ask About the Next Batch</Link>
           </div>
           <dl className="po-grid">
-            {logistics.map((l, i) => (
+            {logistics.map(([l, v], i) => (
               <div key={l}>
                 <span className="po-ic"><Icon name={logisticIcons[i]} size={20} /></span>
                 <dt>{l}</dt>
-                <dd>To be confirmed</dd>
+                <dd className={v ? "is-set" : undefined}>{v ?? "To be confirmed"}</dd>
               </div>
             ))}
           </dl>

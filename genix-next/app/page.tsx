@@ -15,7 +15,7 @@ const proof: [string, string][] = [
 const facts: [string, string, string][] = [
   ["book", "2 Training Programmes", "Foundation & Advanced"],
   ["cart", "1 Continuous Project", "Real e-commerce application"],
-  ["calendar", "3 Classes Per Week", "1 hour per class"],
+  ["calendar", "3 Classes Per Week", "2 weekend + 1 weekday"],
   ["video", "Live Online Classes", "Interactive & hands-on"],
   ["chart", "Industry-focused", "Career-ready skills"],
 ];
@@ -49,6 +49,13 @@ const reasons: [string, string, string][] = [
 ];
 
 const trialIcons = ["video", "list", "laptop", "chat"];
+
+const classSchedule: [string, string, string][] = [
+  ["video", `${schedule.perWeek} live classes`, "per week"],
+  ["clock", `${schedule.hoursPerClass} hour`, "per class"],
+  ["calendar", `${schedule.weekend} classes`, "at the weekend"],
+  ["laptop", `${schedule.weekday} class`, "on a weekday"],
+];
 
 export default function Home() {
   return (
@@ -127,11 +134,21 @@ export default function Home() {
                   {p.priceNote && <small>{p.priceNote}</small>}
                 </div>
                 <div className="pc-actions">
-                  <Link className="pc-more" href="/programme#curriculum">{p.id === "pathway" ? "View Full Pathway" : "View Detailed Curriculum"} <Icon name="arrow" size={16} /></Link>
+                  <Link className="pc-more" href={`/programme#curriculum-${p.id}`}>{p.id === "pathway" ? "View Full Pathway" : "View Detailed Curriculum"} <Icon name="arrow" size={16} /></Link>
                   <Link className="pc-enrol" href={`/enrol?interest=${p.id}`}>Enrol Now</Link>
                 </div>
               </article>
             ))}
+          </div>
+
+          {/* one schedule for every course */}
+          <div className="sched">
+            <h3>Flexible Online Class Schedule</h3>
+            <ul>
+              {classSchedule.map(([ic, t, d]) => (
+                <li key={t}><span className="sched-ic"><Icon name={ic} size={22} /></span><span><b>{t}</b>{d}</span></li>
+              ))}
+            </ul>
           </div>
         </div>
       </section>
@@ -176,6 +193,20 @@ export default function Home() {
                 </div>
               </article>
             ))}
+          </div>
+
+          {/* client experience */}
+          <div className="client">
+            <div className="client-id">
+              <span className="client-logo"><Image src="/clients/pitchup.png" alt="" width={108} height={108} /></span>
+              <div>
+                <span className="client-eb">Client experience</span>
+                <b className="client-name">Pitchup</b>
+              </div>
+            </div>
+            <div className="client-copy">
+              <p><b>Pitchup is a UK camping and holiday accommodation booking platform.</b> Our client experience includes software quality assurance and testing work related to digital booking journeys and user experiences.</p>
+            </div>
           </div>
         </div>
       </section>

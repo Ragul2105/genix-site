@@ -20,7 +20,20 @@ export default function Reveal() {
     const selector = `${REVEAL_SELECTOR}, ${SPLIT_SELECTOR}`;
     const pending = new Set<Element>();
 
+    // This component lives in the root layout, so its effect can run before React has hydrated the page
+    // below it. Touching class/style on an element React hasn't hydrated yet makes React report a
+    // mismatch, so wait for each element to be claimed by React (it then carries a __reactFiber$ key).
+    // Give up waiting after 3 s so nothing can stay hidden.
+    const started = performance.now();
+    const hydrated = (el: Element) =>
+      performance.now() - started > 3000 || Object.keys(el).some((k) => k.startsWith("__reactFiber$"));
+
     const show = (els: Element[]) => {
+      const later = els.filter((el) => !hydrated(el));
+      if (later.length) {
+        requestAnimationFrame(() => show(later));
+        els = els.filter((el) => !later.includes(el));
+      }
       els
         .sort((a, b) => (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1))
         .forEach((el, i) => {

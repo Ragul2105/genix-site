@@ -8,6 +8,10 @@ export type Programme = {
   topics: string[];
   months: number;
   classes: number;
+  /** Total live teaching hours. */
+  hours: number;
+  /** The course-wise curriculum shown on the programme page (the pathway combines the other two). */
+  curriculum?: string[];
   price: number;
   was?: number;
   offer?: string;
@@ -24,14 +28,29 @@ export const programmes: Programme[] = [
     name: "QA Foundation Programme",
     summary: "Build strong fundamentals in software testing and start your QA career with confidence.",
     topics: [
-      "Software testing fundamentals & SDLC",
-      "Agile, Scrum and QA roles",
-      "Manual testing, test cases and test data",
-      "Defect management and regression testing",
-      "Hands-on practice with a real e-commerce project",
+      "QA fundamentals, SDLC, STLC and testing methods",
+      "Test scenarios, test cases and test data",
+      "Defect life cycle, bug reporting and Jira",
+      "First steps in API, SQL and test automation",
+      "Practical exercises on a sample e-commerce app",
     ],
     months: 3,
     classes: 36,
+    hours: 36,
+    curriculum: [
+      "Introduction to software testing and QA fundamentals",
+      "SDLC, STLC and testing methodologies",
+      "Functional and non-functional testing",
+      "Test scenarios, test cases and test data preparation",
+      "Defect life cycle and bug reporting",
+      "Jira and test management basics",
+      "Agile and Scrum fundamentals",
+      "Basic API testing concepts and introduction to Postman",
+      "SQL fundamentals and database validation",
+      "Introduction to test automation: why and when to automate",
+      "Overview of Selenium and Playwright",
+      "Practical exercises using a sample e-commerce application",
+    ],
     price: 10000,
     was: 12000,
     offer: "Launch Offer",
@@ -45,14 +64,30 @@ export const programmes: Programme[] = [
     name: "QA Advanced Programme",
     summary: "Develop advanced skills and gain experience in automation, APIs, databases and CI/CD.",
     topics: [
-      "API testing with Postman",
-      "SQL and database testing",
-      "Test automation with Playwright / Selenium",
-      "Git, CI/CD and pipeline testing",
-      "Advanced scenarios on the real e-commerce project",
+      "API testing with Postman, SQL and database testing",
+      "JavaScript fundamentals for test automation",
+      "Selenium and Playwright with Page Object Model",
+      "Git, GitHub and CI/CD with GitHub Actions",
+      "End-to-end project work and interview preparation",
     ],
     months: 3,
     classes: 36,
+    hours: 36,
+    curriculum: [
+      "Advanced manual testing techniques",
+      "API testing using Postman",
+      "SQL queries and database testing",
+      "JavaScript fundamentals for test automation",
+      "Selenium automation fundamentals",
+      "Playwright automation with hands-on exercises",
+      "Locators, assertions, waits and browser interactions",
+      "Reusable automation scripts and Page Object Model",
+      "Test execution, debugging and reporting",
+      "Git and GitHub fundamentals",
+      "Introduction to CI/CD and GitHub Actions",
+      "End-to-end testing of the sample e-commerce application",
+      "Practical project work and interview preparation",
+    ],
     price: 15000,
     priceNote: "per student, complete 3-month programme",
     photo: "/photos/advanced.webp",
@@ -73,6 +108,7 @@ export const programmes: Programme[] = [
     ],
     months: 6,
     classes: 72,
+    hours: 72,
     price: 24000,
     was: 27000,
     offer: "Save ₹3,000",
@@ -82,7 +118,11 @@ export const programmes: Programme[] = [
 ];
 
 /** Shared schedule for every programme. */
-export const schedule = { perWeek: 3, hoursPerClass: 1, mode: "Live Online" };
+export const schedule = { perWeek: 3, hoursPerClass: 1, weekend: 2, weekday: 1, mode: "Live Online" };
+
+/** The Complete QA Learning Pathway, as Genix describes it. */
+export const pathwayIntro =
+  "The combined Foundation + Advanced pathway takes learners from QA fundamentals through manual testing, API and database validation, practical automation exposure, and end-to-end testing using the sample e-commerce application.";
 
 export const inr = (n: number) => "₹" + n.toLocaleString("en-IN");
 

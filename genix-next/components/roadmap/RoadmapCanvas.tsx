@@ -7,7 +7,7 @@
  * camera dwells on each island. This component only damps it and renders.
  */
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Environment, Html, Lightformer, Sparkles, useGLTF } from "@react-three/drei";
+import { Environment, Lightformer, Sparkles, useGLTF } from "@react-three/drei";
 import { Bloom, EffectComposer, N8AO } from "@react-three/postprocessing";
 import { Suspense, useEffect, useMemo, useRef, type MutableRefObject } from "react";
 import * as THREE from "three";
@@ -598,25 +598,51 @@ function Sky() {
   );
 }
 
-/* ------------------------------------------------------------------ island plaques: the map's labels, and a way to fly there */
-function Plaques({ stop, onSelect, titles }: { stop: number; onSelect: (i: number) => void; titles: string[] }) {
+/* ------------------------------------------------------------------ island plaques: the map's labels, and a way to fly there
+ * The labels are ordinary DOM buttons laid over the canvas (PlaqueLayer); PlaqueTracker, inside the canvas, moves
+ * each one to its island's screen position every frame. (drei's <Html> would make a separate React root per label,
+ * and unmounting those during a render makes React warn.) */
+const PLAQUE_POS = anchors.map((a) => new THREE.Vector3(a.position[0], a.position[1] + (a.part === 18 ? 4.6 : 3.4), a.position[2]));
+
+function PlaqueTracker({ els }: { els: MutableRefObject<(HTMLDivElement | null)[]> }) {
+  const camera = useThree((s) => s.camera);
+  const size = useThree((s) => s.size);
+  const v = useMemo(() => new THREE.Vector3(), []);
+  useFrame(() => {
+    PLAQUE_POS.forEach((p, i) => {
+      const el = els.current[i];
+      if (!el) return;
+      v.copy(p).project(camera);
+      if (v.z > 1) { el.style.visibility = "hidden"; return; } // behind the camera
+      const x = ((v.x + 1) / 2) * size.width;
+      const y = ((1 - v.y) / 2) * size.height;
+      el.style.visibility = "visible";
+      el.style.transform = `translate3d(${x}px,${y}px,0) translate(-50%,-50%)`;
+      el.style.zIndex = String(Math.max(0, Math.round(20 - camera.position.distanceTo(p) / 5))); // nearer on top
+    });
+  });
+  return null;
+}
+
+function PlaqueLayer({ stop, onSelect, titles, els }: {
+  stop: number; onSelect: (i: number) => void; titles: string[]; els: MutableRefObject<(HTMLDivElement | null)[]>;
+}) {
   return (
-    <>
+    <div className="rm-plaques">
       {anchors.map((a, i) => {
         const near = Math.abs(i - Math.max(stop, 0)) <= 2;
-        const [x, y, z] = a.position;
         return (
-          <Html key={a.part} position={[x, y + (a.part === 18 ? 4.6 : 3.4), z]} center zIndexRange={[20, 0]}
-            style={{ pointerEvents: near ? "auto" : "none" }}>
+          <div key={a.part} ref={(el) => { els.current[i] = el; }} className="rm-plaque-pos"
+            style={{ pointerEvents: near ? "auto" : "none", visibility: "hidden" }}>
             <button type="button" tabIndex={-1} onClick={() => onSelect(i)}
               className={`rm-plaque${i === stop ? " on" : ""}${near ? "" : " far"}`}>
               <b>{String(a.part).padStart(2, "0")}</b>
               <span>{titles[i]}</span>
             </button>
-          </Html>
+          </div>
         );
       })}
-    </>
+    </div>
   );
 }
 
@@ -702,7 +728,9 @@ export default function RoadmapCanvas({ travelRef, activeRef, layout, running, q
 }) {
   const route = useMemo(() => buildRoute(layout), [layout]);
   const uRef = useRef(0);
+  const plaqueEls = useRef<(HTMLDivElement | null)[]>([]);
   return (
+    <>
     <Canvas
       shadows
       dpr={quality === "high" ? [1, 1.75] : [1, 1.25]}
@@ -727,7 +755,7 @@ export default function RoadmapCanvas({ travelRef, activeRef, layout, running, q
       <LightPath route={route} uRef={uRef} />
       <Probe route={route} uRef={uRef} />
       <Confetti route={route} activeRef={activeRef} />
-      {layout === "wide" && <Plaques stop={stop} onSelect={onSelect} titles={titles} />}
+      {layout === "wide" && <PlaqueTracker els={plaqueEls} />}
       <Sparkles count={quality === "high" ? 220 : 90} scale={[34, 14, 150]} position={[0, 3, 62]} size={2.4} speed={0.25}
         opacity={0.55} color="#6EA8FF" noise={0.6} />
       {quality === "high" && (
@@ -737,5 +765,7 @@ export default function RoadmapCanvas({ travelRef, activeRef, layout, running, q
         </EffectComposer>
       )}
     </Canvas>
+    {layout === "wide" && <PlaqueLayer stop={stop} onSelect={onSelect} titles={titles} els={plaqueEls} />}
+    </>
   );
 }

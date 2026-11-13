@@ -131,7 +131,7 @@ export default function Roadmap() {
 
   const head = (
     <div className="rm-head">
-      <div className="eb">Full curriculum</div>
+      <div className="eb">The full learning journey</div>
       <h2>{N} parts, from first day to first job search.</h2>
       {support === "3d" && (
         <div className="rm-toggle" role="group" aria-label="Curriculum view">

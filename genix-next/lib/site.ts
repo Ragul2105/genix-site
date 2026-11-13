@@ -116,7 +116,10 @@ export const learningCycle = [
   { title: "Reflect", text: "Consider how you would handle it on the job.", art: "reflect" },
 ];
 
-export const logistics = [
-  "Duration", "Schedule", "Delivery mode", "Fees",
-  "Prerequisites", "Batch dates", "Trainer details", "Tools and technologies",
+/** Programme details as [label, confirmed value]; null shows "To be confirmed". */
+export const logistics: [string, string | null][] = [
+  ["Duration", "3 months per course · 6 months for the full pathway"],
+  ["Schedule", "3 live 1-hour classes a week: 2 weekend + 1 weekday"],
+  ["Delivery mode", null], ["Fees", null],
+  ["Prerequisites", null], ["Batch dates", null], ["Trainer details", null], ["Tools and technologies", null],
 ];
